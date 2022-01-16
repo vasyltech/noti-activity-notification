@@ -1,0 +1,68 @@
+.dataTable td {
+    vertical-align: middle;
+}
+
+.widefat.dataTable .check-column {
+    padding: 0;
+    vertical-align: middle;
+}
+
+.widefat .column-primary {
+    vertical-align: middle;
+}
+
+.dataTable td input {
+    margin-left: 8px;
+}
+
+.dataTables_empty {
+    text-align: center;
+}
+
+.dataTables_paginate .paginate_button.disabled,
+.dataTables_paginate .paginate_button.current {
+    color: #a7aaad !important;
+    border-color: #dcdcde !important;
+    background: #f6f7f7 !important;
+    box-shadow: none !important;
+    cursor: default;
+    transform: none !important;
+}
+
+.dataTables_paginate .ellipsis {
+    display: inline-block;
+    margin: 0 7px;
+}
+
+.dataTable .column-description .second {
+    font-size: 0.9em;
+}
+
+.dataTables_paginate .paginate_button {
+    color: #2271b1;
+    border-color: #2271b1;
+    background: #f6f7f7;
+    display: inline-block;
+    vertical-align: baseline;
+    min-width: 30px;
+    min-height: 30px;
+    margin: 0 0 0 2px;
+    padding: 0 4px;
+    font-size: 16px;
+    line-height: 1.625;
+    text-align: center;
+    display: inline-block;
+    text-decoration: none;
+    font-size: 13px;
+    line-height: 2.15384615;
+    min-height: 30px;
+    margin: 2px;
+    padding: 0 10px;
+    cursor: pointer;
+    border-width: 1px;
+    border-style: solid;
+    -webkit-appearance: none;
+    border-radius: 3px;
+    white-space: nowrap;
+    box-sizing: border-box;
+}

@@ -1,0 +1,18 @@
+{
+    "Event": "wp:::action:activated_plugin",
+    "Level": "warning",
+    "Attributes": {
+        "user_id": "user.ID",
+        "user_display_name": "user.display_name",
+        "plugin": "args[0]",
+        "network_wide": "args[1]"
+    },
+    "Aggregate": {
+        "ByAttributes": [
+            "user.ID",
+            "args[0]"
+        ],
+        "ByTimespan": 900
+    },
+    "LogMessageMarkdown": "*{user_display_name}* _(ID: {user_id})_ activate the *{plugin}* plugin *{event.count} in the span of 15 minutes*"
+}
