@@ -1,6 +1,13 @@
 <?php
 
-namespace ReactiveLog\EventType\Config;
+/*
+ * This file is a part of JsonPolicy.
+ *
+ * For detailed copyright and license information, please view the
+ * LICENSE file that was distributed with this source code.
+ */
+
+namespace JsonPolicy\Core;
 
 use JsonPolicy\Manager;
 
@@ -48,7 +55,7 @@ class Context
      */
     public function getMarkerValue($source, $xpath)
     {
-        return MarkerManager::getValue($source, $xpath, $this);
+        return $this->manager->getMarkerManager()->getValue($source, $xpath, $this);
     }
 
     /**

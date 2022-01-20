@@ -7,7 +7,9 @@
  * LICENSE file that was distributed with this source code.
  */
 
-namespace ReactiveLog\EventType\Config;
+namespace JsonPolicy\Parser;
+
+use JsonPolicy\Core\Context;
 
 /**
  * Condition parser

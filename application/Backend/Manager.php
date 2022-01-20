@@ -128,10 +128,6 @@ class Manager
 
     public function renderCategoryPage()
     {
-        global $taxnow;
-
-       // $taxnow = 'rl_event_type_category';
-
         require ABSPATH . 'wp-admin/edit-tags.php';
     }
 

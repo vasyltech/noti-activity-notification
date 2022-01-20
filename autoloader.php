@@ -6,14 +6,17 @@ class Autoloader
 {
 
     /**
-     *
+     * Absolute path to the vendor directory
      */
     const BASEDIR = __DIR__ . '/vendor';
 
     /**
-     * Undocumented variable
+     * Manually mapped classes to their physical locations
      *
      * @var array
+     *
+     * @access protected
+     * @static
      */
     protected static $classmap = array(
         'ReactiveLog\Vendor\Parsedown' => self::BASEDIR . '/parsedown/Parsedown.php',
@@ -32,6 +35,15 @@ class Autoloader
         'Vectorface\Whip\Request\RequestAdapter' => self::BASEDIR . '/whip/Request/RequestAdapter.php',
         'Vectorface\Whip\Request\SuperglobalRequestAdapter' => self::BASEDIR . '/whip/Request/SuperglobalRequestAdapter.php',
         'Vectorface\Whip\Whip' => self::BASEDIR . '/whip/Whip.php',
+        'JsonPolicy\Manager' => self::BASEDIR . '/json-policy/Manager.php',
+        'JsonPolicy\Core\Context' => self::BASEDIR . '/json-policy/Core/Context.php',
+        'JsonPolicy\Core\Entity' => self::BASEDIR . '/json-policy/Core/Entity.php',
+        'JsonPolicy\Manager\ConditionManager' => self::BASEDIR . '/json-policy/Manager/ConditionManager.php',
+        'JsonPolicy\Manager\MarkerManager' => self::BASEDIR . '/json-policy/Manager/MarkerManager.php',
+        'JsonPolicy\Manager\TypecastManager' => self::BASEDIR . '/json-policy/Manager/TypecastManager.php',
+        'JsonPolicy\Parser\ConditionParser' => self::BASEDIR . '/json-policy/Parser/ConditionParser.php',
+        'JsonPolicy\Parser\ExpressionParser' => self::BASEDIR . '/json-policy/Parser/ExpressionParser.php',
+        'JsonPolicy\Parser\PolicyParser' => self::BASEDIR . '/json-policy/Parser/PolicyParser.php'
     );
 
     /**
@@ -73,4 +85,5 @@ class Autoloader
     {
         spl_autoload_register('\ReactiveLog\Autoloader::load');
     }
+
 }

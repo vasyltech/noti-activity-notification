@@ -1,6 +1,16 @@
 <?php
 
-namespace ReactiveLog\EventType\Config;
+/*
+ * This file is a part of JsonPolicy.
+ *
+ * For detailed copyright and license information, please view the
+ * LICENSE file that was distributed with this source code.
+ */
+
+namespace JsonPolicy\Parser;
+
+use JsonPolicy\Core\Entity,
+    JsonPolicy\Core\Context;
 
 /**
  * Expression parser
@@ -41,8 +51,8 @@ class ExpressionParser
     /**
      * Parse expression and covert it to value
      *
-     * @param mixed   $expression
-     * @param Context $context
+     * @param mixed                    $expression
+     * @param \JsonPolicy\Core\Context $context
      *
      * @return mixed
      *
@@ -59,8 +69,8 @@ class ExpressionParser
     /**
      * Convert entity to value
      *
-     * @param Entity  $entity
-     * @param Context $context
+     * @param \JsonPolicy\Core\Entity  $entity
+     * @param \JsonPolicy\Core\Context $context
      *
      * @return mixed
      *

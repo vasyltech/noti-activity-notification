@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Plugin Name: Reactive Log
+ * Plugin Name: Your Website Activity Notification
  * Description: Track any activity and notify them in the near-to-realtime
  * Version: 0.0.1
  * Author: Vasyl Martyniuk <vasyl@vasyltech.com>
@@ -17,8 +17,7 @@
 
 use ReactiveLog\Core\Manager as CoreManager,
     ReactiveLog\Backend\Manager as BackendManager,
-    ReactiveLog\Restful\Manager as RestfulManager,
-    ReactiveLog\EventType\Manager as EventTypeManager;
+    ReactiveLog\Restful\Manager as RestfulManager;
 
 /**
  * Main plugin's class
@@ -66,9 +65,6 @@ class ReactiveLog
             BackendManager::bootstrap();
         }
 
-        // Initialize the Event Type manager
-        EventTypeManager::bootstrap();
-
         // Initialize the core manager
         CoreManager::bootstrap();
 
@@ -114,9 +110,6 @@ class ReactiveLog
         } elseif (version_compare($wp_version, '4.7.0') === -1) {
             exit(__('WP 4.7.0 or higher is required.', REACTIVE_LOG_KEY));
         }
-
-        // Register all default event types
-        EventTypeManager::getInstance()->setup();
     }
 
     /**

@@ -6,6 +6,21 @@ class Repository
 {
 
     /**
+     *
+     */
+    const EVENT_STATUS_DEFAULT = 1;
+
+    /**
+     *
+     */
+    const EVENT_STATUS_NOTIFIED = 8;
+
+    /**
+     *
+     */
+    const EVENT_STATUS_DELETED = 128;
+
+    /**
      * Undocumented function
      *
      * @param [type] $event
@@ -21,14 +36,15 @@ class Repository
 
         $table = $wpdb->prefix . 'rl_events';
 
-        $q  = "INSERT INTO {$table} (`post_id`, `first_occurrence`, `group`) ";
-        $q .= 'VALUES (%d, %s, %s) ON DUPLICATE KEY UPDATE ';
-        $q .= '`last_occurrence` = %s, `counter` = `counter` + 1';
+        $q  = "INSERT INTO {$table} (`post_id`, `first_occurrence_at`, `sealed_at`, ";
+        $q .= '`group`) VALUES (%d, %s, %s, %s) ON DUPLICATE KEY UPDATE ';
+        $q .= '`last_occurrence_at` = %s, `counter` = `counter` + 1';
 
         $wpdb->query($wpdb->prepare(
             $q,
             $event['post_id'],
             $event['created_at'],
+            $event['sealed_at'],
             $event['group'],
             $event['created_at'],
             $event['created_at']
@@ -87,7 +103,7 @@ class Repository
         $prefix = $wpdb->prefix;
 
         $query  = 'SELECT DISTINCT(e.id), e.post_id, ';
-        $query .= "IFNULL(e.last_occurrence, e.first_occurrence) AS `time`, ";
+        $query .= "IFNULL(e.last_occurrence_at, e.first_occurrence_at) AS `time`, ";
         $query .= "e.counter FROM {$prefix}rl_events AS e ";
         $query .= "LEFT JOIN {$prefix}rl_eventmeta AS m ON (e.id = m.event_id)";
 
@@ -113,11 +129,14 @@ class Repository
         $query  = 'SELECT DISTINCT(e.post_id), p.post_title ';
         $query .= "FROM {$prefix}rl_events AS e ";
         $query .= "LEFT JOIN {$prefix}posts AS p ON (e.post_id = p.ID) ";
-        $query .= "WHERE e.is_deleted <> 1 ORDER BY p.post_title ASC";
+        $query .= "WHERE e.status & %d = 0 ORDER BY p.post_title ASC";
+
+        // Prepare the query
+        $sql = $wpdb->prepare($query, self::EVENT_STATUS_DELETED);
 
         $response = array();
 
-        foreach($wpdb->get_results($wpdb->prepare($query), ARRAY_A) as $row) {
+        foreach($wpdb->get_results($sql, ARRAY_A) as $row) {
             $response[$row['post_title']] = $row['post_id'];
         }
 
@@ -138,11 +157,14 @@ class Repository
         $query  = 'SELECT m.meta_value, COUNT(e.id) AS total ';
         $query .= "FROM {$prefix}rl_events AS e ";
         $query .= "LEFT JOIN {$prefix}rl_eventmeta AS m ON (e.id = m.event_id) ";
-        $query .= 'WHERE e.is_deleted = 0 AND m.meta_key = %s GROUP BY m.meta_value';
+        $query .= 'WHERE e.status & %d = 0 AND m.meta_key = %s GROUP BY m.meta_value';
+
+        // Prepare the query
+        $sql = $wpdb->prepare($query, self::EVENT_STATUS_DELETED, 'level');
 
         $response = array();
 
-        foreach($wpdb->get_results($wpdb->prepare($query, 'level'), ARRAY_A) as $row) {
+        foreach($wpdb->get_results($sql, ARRAY_A) as $row) {
             $response[$row['meta_value']] = $row['total'];
         }
 
@@ -188,10 +210,33 @@ class Repository
 
         $table = $wpdb->prefix . 'rl_events';
 
-        $q  = "UPDATE {$table} SET `is_deleted` = %d WHERE ";
-        $q .= 'DATEDIFF(NOW(), IFNULL(last_occurrence, first_occurrence)) > %d';
+        $q  = "UPDATE {$table} SET `status` = `status` | %d WHERE ";
+        $q .= 'DATEDIFF(NOW(), IFNULL(last_occurrence_at, first_occurrence_at)) > %d';
 
-        return $wpdb->query($wpdb->prepare($q, 1, $days));
+        return $wpdb->query($wpdb->prepare($q, self::EVENT_STATUS_DELETED, $days));
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param integer $limit
+     *
+     * @return array
+     */
+    public static function getSealedNewEvents($limit = 100)
+    {
+        global $wpdb;
+
+        $table = $wpdb->prefix . 'rl_events';
+        $now   = date('Y-m-d H:i:s');
+
+        $query  = "SELECT * FROM {$table} WHERE (`sealed_at` < %s) && ";
+        $query .= "(`status` & %d = 0) ORDER BY `sealed_at` ASC LIMIT %d";
+
+        return $wpdb->get_results(
+            $wpdb->prepare($query, $now, self::EVENT_STATUS_NOTIFIED, $limit),
+            ARRAY_A
+        );
     }
 
     /**
@@ -206,8 +251,8 @@ class Repository
     {
         global $wpdb;
 
-        $where = array();
-        $args  = array();
+        $where = array('(e.`status` & %d = 0)');
+        $args  = array(self::EVENT_STATUS_DELETED);
 
         if (!empty($filters['search'])) {
             $where[] = '(m.meta_value LIKE %s)';
@@ -225,7 +270,7 @@ class Repository
         }
 
         if (!empty($filters['since'])) {
-            $where[] = '(e.first_occurrence >= %s || e.last_occurrence >= %s)';
+            $where[] = '(e.first_occurrence_at >= %s || e.last_occurrence_at >= %s)';
             array_push($args, $filters['since'], $filters['since']);
         }
 

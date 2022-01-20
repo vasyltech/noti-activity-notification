@@ -2,8 +2,6 @@
 
 namespace ReactiveLog\Core;
 
-use ReactiveLog\EventType\Manager as EventTypeManager;
-
 class Manager
 {
 
@@ -19,11 +17,12 @@ class Manager
      */
     protected function __construct()
     {
-        // Building the tree of active events and hooking them to the system
-        $event_types = EventTypeManager::getInstance()->getAllActiveEventTypes();
+        // Bootstrap the Event policy factory
+        $factory = EventPolicyFactory::bootstrap();
 
-        foreach ($event_types as $type) {
-            $this->registerEvent($type);
+        // Building the tree of active events and hooking them to the system
+        foreach ($factory->getActiveEventTypes() as $type) {
+            $this->registerEventType($type);
         }
 
         add_filter('noti_func_source', function ($func, $args) {
@@ -40,84 +39,129 @@ class Manager
             Repository::trashOldLogs(get_option('reactivelog-keep-logs'));
         });
 
+        add_action('noti_send_notifications', function () {
+            NotificationManager::trigger();
+        });
+
         if (!wp_next_scheduled('noti_cleanup_log')) {
             wp_schedule_event(time(), 'twicedaily', 'noti_cleanup_log');
+        }
+
+        add_filter('cron_schedules', function($schedules) {
+            return array_merge($schedules, array('noti_interval' => array(
+                'interval' => 60,
+                'display'  => __('Every Minute')
+            )));
+        });
+
+        if (!wp_next_scheduled('noti_send_notifications')) {
+            wp_schedule_event(time(), 'noti_interval', 'noti_send_notifications');
         }
     }
 
     /**
      * Undocumented function
      *
-     * @param array $event
+     * @param object $eventType
      *
      * @return void
      *
      * @access protected
      */
-    protected function registerEvent($event)
+    protected function registerEventType($eventType)
     {
         $scope    = uniqid('', true);
-        $callback = function () use ($event, $scope) {
+        $callback = function () use ($eventType, $scope) {
             // Get all hook attributes
             $args = func_get_args();
 
-            $config = EventTypeManager::getInstance()->evaluateConfig(
-                $event['config'],
-                ['args' => $args, 'scope' => $scope]
+            // Parse the event policy and determine if we need to persist this event
+            $manager = EventPolicyFactory::getInstance()->hydrate(
+                json_encode($eventType->policy),
+                array(
+                    'args'      => $args,
+                    'scope'     => $scope,
+                    'eventType' => $eventType->post
+                )
             );
 
-            if ($config !== null) {
-                // If there is aggregation, let's calculate the unique group
-                $group = array($event['post_id']);
+            // Seal group at
+            $now = time();
 
-                if (isset($config->Aggregate)) {
-                    $aggregate = $config->Aggregate;
+            if ($manager->isApplicable()) {
+                // If there is aggregation, let's calculate the unique group
+                $group  = array($eventType->post_id);
+                $sealed = $now;
+
+                if (isset($manager->Aggregate)) {
+                    $aggregate = $manager->Aggregate;
 
                     if (isset($aggregate->ByAttributes)) {
                         array_push($group, ...$aggregate->ByAttributes);
                     }
 
-                    if (isset($aggregate->ByTimespan)) {
-                        $group[] = time() - time() % intval($aggregate->ByTimespan);
+                    $ts    = $aggregate->ByTimeSegment ?? null;
+                    $ts    = is_string($ts) ? strtolower(trim($ts)) : null;
+                    $by_ts = 0;
+
+                    if ($ts && preg_match('/^([\d]+)(y|m|d|h|i|s)$/i', $ts, $m)) {
+                        if ($m[2] === 'y') {
+                            $by_ts = intval($m[1]) * 31536000;
+                        } elseif ($m[2] === 'm') {
+                            $by_ts = intval($m[1]) * 2592000;
+                        } elseif ($m[2] === 'd') {
+                            $by_ts = intval($m[1]) * 86400;
+                        } elseif ($m[2] === 'h') {
+                            $by_ts = intval($m[1]) * 3600;
+                        } elseif ($m[2] === 'i') {
+                            $by_ts = intval($m[1]) * 60;
+                        } elseif ($m[2] === 's') {
+                            $by_ts = intval($m[1]);
+                        }
+                    }
+
+                    if ($by_ts > 0) {
+                        $group[] = floor($now / $by_ts);
+                        $sealed  = $now + $by_ts;
                     }
                 } else {
-                    $group[] = time();
+                    $group[] = $now;
                 }
 
                 // Now, let's store the event
                 Repository::insertEvent(array(
-                    'post_id'    => $event['post_id'],
+                    'post_id'    => $eventType->post_id,
                     'created_at' => date('Y-m-d H:i:s'),
+                    'sealed_at'  => date('Y-m-d H:i:s', $sealed),
                     'group'      => md5(implode('', $group))
-                ), $this->prepareEventMetadata($config));
+                ), $this->prepareEventMetadata($manager));
             }
         };
 
         // Now register the hook
-        $this->registerHook($event['type'], $event['hook'], $callback);
+        $this->registerHook($eventType->type, $eventType->hook, $callback);
 
-        if (count($event['listeners'])) {
-            foreach ($event['listeners'] as $i => $listener) {
-                $listener_callback = function () use ($i, $listener, $scope) {
-                    // Get all hook attributes
-                    $args = func_get_args();
+        foreach ($eventType->listeners as $i => $listener) {
+            $listener_cb = function () use ($i, $listener, $scope, $eventType) {
+                // Get all hook attributes
+                $args = func_get_args();
 
-                    $config = EventTypeManager::getInstance()->evaluateConfig(
-                        $listener['config'],
-                        ['args' => $args]
-                    );
-
-                    if ($config !== null) {
-                        ListenerManager::addToScope($scope, $i, $config->Data);
-                    }
-                };
-
-                $this->registerHook(
-                    $listener['type'],
-                    $listener['hook'],
-                    $listener_callback
+                // Parse the event policy and determine if we need to trigger the
+                // listener
+                $manager = EventPolicyFactory::getInstance()->hydrate(
+                    json_encode($listener->policy),
+                    array(
+                        'args' => $args,
+                        'eventType' => $eventType->post
+                    )
                 );
-            }
+
+                if ($manager->isApplicable()) {
+                    ListenerManager::addToScope($scope, $i, $manager->Metadata);
+                }
+            };
+
+            $this->registerHook($listener->type, $listener->hook, $listener_cb);
         }
     }
 
@@ -141,22 +185,22 @@ class Manager
     /**
      * Undocumented function
      *
-     * @param [type] $config
+     * @param \JsonPolicy\Manager $manager
      *
      * @return void
      */
-    protected function prepareEventMetadata($config)
+    protected function prepareEventMetadata($manager)
     {
         $response = (object) [];
 
-        if (!isset($config->Metadata) || !is_object($config->Metadata)) {
+        if (!isset($manager->Metadata) || !is_object($manager->Metadata)) {
             $metadata = (object) [];
         } else {
-            $metadata = $config->Metadata;
+            $metadata = $manager->Metadata;
         }
 
         if (empty($metadata->level)) {
-            $metadata->level = $config->Level ?? 'info';
+            $metadata->level = $manager->Level ?? 'info';
         }
 
         // Trim & prune all empty values
@@ -197,4 +241,5 @@ class Manager
     {
         return self::bootstrap();
     }
+
 }

@@ -7,7 +7,7 @@
  * LICENSE file that was distributed with this source code.
  */
 
-namespace ReactiveLog\EventType\Config;
+namespace JsonPolicy\Core;
 
 /**
  * A single entity

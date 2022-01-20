@@ -1,23 +1,9 @@
 <?php
 
-namespace ReactiveLog\EventType;
+namespace ReactiveLog\Core;
 
-use ReactiveLog\EventType\Config\Manager as ConfigManager;
-
-class Manager
+class EventTypeManager
 {
-
-     /**
-     *
-     */
-    const HOOK_TYPES = array (
-        'action', 'filter'
-    );
-
-    /**
-     *
-     */
-    const FUNC_REGEXP = '/^([a-z_\x80-\xff][a-z\d_\x80-\xff]*)\(([^)]+)\)(.*)$/i';
 
     /**
      * Undocumented variable
@@ -25,17 +11,6 @@ class Manager
      * @var [type]
      */
     private static $_instance = null;
-
-
-    /**
-     * Undocumented variable
-     *
-     * @var array
-     */
-    private $_events = array(
-        'Triggered' => array(),
-        'Skipped'   => array()
-    );
 
     /**
      * Undocumented function
@@ -60,9 +35,7 @@ class Manager
             'exclude_from_search' => true,
             'publicly_queryable' => false,
             'hierarchical' => false,
-            'supports'     => array(
-                'title', 'excerpt'
-            ),
+            'supports'     => array('title', 'excerpt'),
             'delete_with_user' => false,
             'capabilities' => array(
                 'edit_post'         => 'administrator',
@@ -408,213 +381,9 @@ class Manager
     /**
      * Undocumented function
      *
-     * @return array
-     */
-    public function getAllActiveEventTypes()
-    {
-        $response = [];
-
-        if (is_multisite()) {
-            // All event types are global and live in the main site
-            switch_to_blog($this->getMainSiteId());
-        }
-
-        $types = get_posts(array(
-            'post_type'   => 'rl_event_type',
-            'numberposts' => -1,
-            'post_status' => 'publish',
-        ));
-
-        if (is_multisite()) {
-            restore_current_blog();
-        }
-
-        foreach($types as $type) {
-            $event = $this->prepareEventType($type);
-
-            if (!is_null($event)) {
-                array_push($response, $event);
-            }
-        }
-
-        return $response;
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @param [type] $type
      * @return void
      */
-    public function prepareEventType($type)
-    {
-        $response = null;
-
-        if (is_a($type, 'WP_Post')) {
-            $json = json_decode($type->post_content);
-
-            if (is_object($json)) {
-                $event = $this->parseEvent($json->Event ?? null);
-
-                if (!is_null($event)) {
-                    $response = array(
-                        'post_id'   => $type->ID,
-                        'type'      => $event['type'],
-                        'hook'      => $event['hook'],
-                        'config'    => $json,
-                        'event'     => $type,
-                        'listeners' => array()
-                    );
-
-                    // Also parse all the listeners if defined
-                    if (isset($json->Listener)) {
-                        if(is_array($json->Listener)) {
-                            $listeners = $json->Listener;
-                        } else {
-                            $listeners = [$json->Listener];
-                        }
-                    } else {
-                        $listeners = array();
-                    }
-
-                    foreach($listeners as $listener) {
-                        $event = $this->parseEvent($listener->Event ?? null);
-
-                        if (!is_null($event)) {
-                            array_push($response['listeners'], array(
-                                'post_id' => $type->ID,
-                                'type'    => $event['type'],
-                                'hook'    => $event['hook'],
-                                'config'  => $listener
-                            ));
-                        }
-                    }
-                }
-            }
-        }
-
-        return $response;
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @param [type] $config
-     * @param array $properties
-     *
-     * @return object
-     */
-    public function evaluateConfig($config, array $properties)
-    {
-        $manager = ConfigManager::getInstance();
-
-        // Let's deep clone the $config
-        $clone   = $this->cloneConfig($config);
-        $context = $manager->getContext(array_merge(
-            $properties, array('__config' => $clone, '__story')
-        ));
-
-        $response = $manager->hydrate($clone, $context);
-
-        if (isset($response->Condition)) {
-            if (!$manager->isApplicable($response->Condition, $context)) {
-                $response = null; // Nope, let's do nothing more
-            }
-        }
-
-        // Capture the history of the events execution
-        if (is_null($response)) {
-            array_push($this->_events['Skipped'], $config->Event);
-        } else {
-            array_push($this->_events['Triggered'], $config->Event);
-        }
-
-        return $response;
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @param [type] $config
-     *
-     * @return void
-     */
-    protected function cloneConfig($config)
-    {
-        $clone = is_array($config) ? [] : (object)[];
-
-        foreach($config as $key => $value) {
-            if (is_scalar($value) || is_null($value)) {
-                if (is_array($clone)) {
-                    $clone[$key] = $value;
-                } else {
-                    $clone->{$key} = $value;
-                }
-            } else {
-                if (is_array($clone)) {
-                    $clone[$key] = $this->cloneConfig($value);
-                } else {
-                    $clone->{$key} = $this->cloneConfig($value);
-                }
-            }
-        }
-
-        return $clone;
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @param string $event_str
-     *
-     * @return array|null
-     *
-     * @access protected
-     */
-    protected function parseEvent($event_str)
-    {
-        // Making sure that it is always string
-        $event_str = is_string($event_str) ? $event_str : '';
-
-        if (strpos($event_str, 'wp:::') === 0) {
-            $event_str = substr($event_str, 5); // Remove the "wp:::" prefix
-        }
-
-        $details = explode(':', $event_str);
-
-        // Verifying that the type of hook is valid. Can be only "action" or "filter"
-        if (isset($details[0]) && in_array($details[0], self::HOOK_TYPES, true)) {
-            $type = $details[0];
-        }
-
-        if (isset($details[1])) {
-            $hook = $details[1];
-        }
-
-        return $type && $hook ? array('type' => $type, 'hook' => $hook) : null;
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @return void
-     */
-    public function setup()
-    {
-        if (is_multisite()) {
-            // All event types are global and live in the main site
-            switch_to_blog($this->getMainSiteId());
-
-            restore_current_blog();
-        }
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @return void
-     */
-    public function getMainSiteId()
+    protected function getMainSiteId()
     {
         if (function_exists('get_main_site_id')) {
             $id = get_main_site_id();
@@ -633,6 +402,17 @@ class Manager
      *
      * @return void
      */
+    public function setup()
+    {
+        if (is_multisite()) {
+        }
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return EventTypeManager
+     */
     public static function bootstrap()
     {
         if (is_null(self::$_instance)) {
@@ -645,7 +425,7 @@ class Manager
     /**
      * Get single instance of the manager
      *
-     * @return Manager
+     * @return EventTypeManager
      *
      * @access public
      * @static

@@ -4,9 +4,8 @@ namespace ReactiveLog\Restful;
 
 use WP_REST_Request,
     ReactiveLog\Core\Repository,
-    ReactiveLog\Vendor\Parsedown as MarkdownManager,
-    ReactiveLog\EventType\Manager as EventTypeManager,
-    ReactiveLog\EventType\Config\Manager as ConfigManager;
+    ReactiveLog\Core\EventManager,
+    ReactiveLog\Core\EventTypeManager;
 
 /**
  * Undocumented class
@@ -92,46 +91,16 @@ class Manager
             $length = intval($request->get_param('length'));
             $offset = intval($request->get_param('offset'));
 
-            $events        = Repository::getEvents($filters, $length, $offset);
-            $markdown      = new MarkdownManager;
-            $configManager = ConfigManager::getInstance();
+            $events = Repository::getEvents($filters, $length, $offset);
 
             foreach ($events as $event) {
-                $metadata = Repository::getEventMeta($event['id']);
-                $type     = EventTypeManager::getInstance()->prepareEventType(
-                    get_post($event['post_id'])
-                );
-
-                $message = null;
-
-                // Prepare the message
-                if (isset($type['config']->LogMessageMarkdown)) {
-                    $message = $type['config']->LogMessageMarkdown;
-                }
-
-                // Set default message
-                if (!is_string($message) || strlen(trim($message)) === 0) {
-                    $message = 'The event **${CONTEXT.EventType.post_title}** occurred';
-                }
-
-                // Prepare the context and build the message
-                $context = $configManager->getContext(array(
-                    'EventType'    => $type['event'],
-                    'Event'        => $event,
-                    '__config'     => array(
-                        'Metadata' => $metadata
-                    )
-                ));
-                $message = $configManager->hydrate($message, $context);
-
-
-                // Prepare the occurrence data
+                $meta = Repository::getEventMeta($event['id']);
                 $time = $event['time'];
 
                 $response['data'][] = array(
-                    $markdown->text($message),
-                    $markdown->text($time . '<br/>**' . $this->timestampToAgo($time) . '**'),
-                    isset($metadata['user_ip']) ? $metadata['user_ip'] : '----',
+                    EventManager::prepareEventLogMessage($event, $meta),
+                    $time . '<br/><b>' . $this->timestampToAgo($time) . '</b>',
+                    isset($meta['user_ip']) ? $meta['user_ip'] : '----',
                     $event['counter']
                 );
             }

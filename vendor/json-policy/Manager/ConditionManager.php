@@ -7,7 +7,7 @@
  * LICENSE file that was distributed with this source code.
  */
 
-namespace ReactiveLog\EventType\Config;
+namespace JsonPolicy\Manager;
 
 /**
  * Conditions manager
@@ -157,12 +157,12 @@ class ConditionManager
     ) {
         $result = null;
 
-        foreach ($conditions as $condition) {
+        foreach ($conditions as $cnd) {
             $sub_result = null;
 
-            foreach($condition['right'] as $value) {
+            foreach($cnd['right'] as $value) {
                 $sub_result = $this->compute(
-                    $sub_result, ($condition['left'] === $value), 'OR'
+                    $sub_result, ($cnd['left'] === $value), 'OR'
                 );
             }
 
@@ -188,12 +188,12 @@ class ConditionManager
     ) {
         $result = null;
 
-        foreach ($conditions as $condition) {
+        foreach ($conditions as $cnd) {
             $sub_result = null;
 
-            foreach($condition['right'] as $value) {
+            foreach($cnd['right'] as $value) {
                 $sub_result = $this->compute(
-                    $sub_result, ($condition['left'] !== $value), 'OR'
+                    $sub_result, ($cnd['left'] !== $value), 'OR'
                 );
             }
 
@@ -501,7 +501,7 @@ class ConditionManager
      * @access private
      * @version 0.0.1
      */
-    private function _determineConditionOperator($conditions)
+    private function _determineConditionOperator(object $conditions)
     {
         $op = 'AND';
 
