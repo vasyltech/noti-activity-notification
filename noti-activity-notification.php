@@ -1,12 +1,12 @@
 <?php
 
 /**
- * Plugin Name: Your Website Activity Notification
+ * Plugin Name: Noti - Activity Notification
  * Description: Track any activity and notify them in the near-to-realtime
  * Version: 0.0.1
  * Author: Vasyl Martyniuk <vasyl@vasyltech.com>
  * Author URI: https://vasyltech.com
- * Text Domain: reactive-log
+ * Text Domain: noti
  * Domain Path: /lang/
  *
  * -------
@@ -15,24 +15,24 @@
  *
  **/
 
-use ReactiveLog\Core\Manager as CoreManager,
-    ReactiveLog\Backend\Manager as BackendManager,
-    ReactiveLog\Restful\Manager as RestfulManager;
+use Noti\Core\Manager as CoreManager,
+    Noti\Backend\Manager as BackendManager,
+    Noti\Restful\Manager as RestfulManager;
 
 /**
  * Main plugin's class
  *
- * @package ReactiveLog
+ * @package Noti
  * @author Vasyl Martyniuk <vasyl@vasyltech.com>
  * @version 0.0.1
  */
-class ReactiveLog
+class NotiActivityNotification
 {
 
     /**
      * Single instance of itself
      *
-     * @var ReactiveLog
+     * @var NotiActivityNotification
      *
      * @access private
      * @version 0.0.1
@@ -40,7 +40,7 @@ class ReactiveLog
     private static $_instance = null;
 
     /**
-     * Initialize the ReactiveLog Object
+     * Initialize the plugin
      *
      * @return void
      *
@@ -73,9 +73,9 @@ class ReactiveLog
     }
 
     /**
-     * Initialize the ReactiveLog plugin
+     * Initialize the plugin
      *
-     * @return ReactiveLog
+     * @return NotiActivityNotification
      *
      * @access public
      * @version 0.0.1
@@ -85,8 +85,8 @@ class ReactiveLog
         if (is_null(self::$_instance)) {
             self::$_instance = new self;
 
-            // Load ReactiveLog internationalization
-            load_plugin_textdomain(REACTIVE_LOG_KEY, false, 'reactive-log/lang');
+            // Load the internationalization
+            load_plugin_textdomain(NOTI_KEY, false, 'noti/lang');
         }
 
         return self::$_instance;
@@ -106,16 +106,16 @@ class ReactiveLog
 
         // Check the minimum required versions
         if (version_compare(PHP_VERSION, '7.0.0') === -1) {
-            exit(__('PHP 7.0.0 or higher is required.', REACTIVE_LOG_KEY));
+            exit(__('PHP 7.0.0 or higher is required.', NOTI_KEY));
         } elseif (version_compare($wp_version, '4.7.0') === -1) {
-            exit(__('WP 4.7.0 or higher is required.', REACTIVE_LOG_KEY));
+            exit(__('WP 4.7.0 or higher is required.', NOTI_KEY));
         }
     }
 
     /**
      * Deactivate hook
      *
-     * Remove all leftovers from ReactiveLog execution
+     * Remove all plugin's leftovers
      *
      * @return void
      *
@@ -125,21 +125,22 @@ class ReactiveLog
     public static function uninstall()
     {
     }
+
 }
 
 if (defined('ABSPATH')) {
     // Define some global constants
-    define('REACTIVE_LOG_KEY', 'reactive-log');
-    define('REACTIVE_LOG_MEDIA', __DIR__ . '/media');
+    define('NOTI_KEY', 'noti');
+    define('NOTI_MEDIA', __DIR__ . '/media');
 
     // Register autoloader
     require(__DIR__ . '/autoloader.php');
-    \ReactiveLog\Autoloader::register();
+    Noti\Autoloader::register();
 
     // On WP core initialization hook
-    add_action('init', 'ReactiveLog::onInit');
+    add_action('init', 'NotiActivityNotification::onInit');
 
     //activation & deactivation hooks
-    register_activation_hook(__FILE__, array('ReactiveLog', 'activate'));
-    register_uninstall_hook(__FILE__, array('ReactiveLog', 'uninstall'));
+    register_activation_hook(__FILE__, array('NotiActivityNotification', 'activate'));
+    register_uninstall_hook(__FILE__, array('NotiActivityNotification', 'uninstall'));
 }

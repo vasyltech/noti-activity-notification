@@ -1,6 +1,6 @@
 <?php
 
-if (defined('REACTIVE_LOG_KEY')) {
+if (defined('NOTI_KEY')) {
 ?>
     <style>
         #event-type-publisher .inside {

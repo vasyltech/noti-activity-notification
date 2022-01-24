@@ -1,8 +1,8 @@
 <?php
 
-namespace ReactiveLog\Core;
+namespace Noti\Core;
 
-use ReactiveLog\Vendor\Parsedown as MarkdownManager;
+use Noti\Vendor\Parsedown as MarkdownManager;
 
 class EventManager
 {
@@ -19,11 +19,13 @@ class EventManager
      *
      * @param [type] $event
      * @param [type] $metadata
+     * @param [type] $message
      *
      * @return void
      */
-    public static function prepareEventLogMessage($event, $metadata = null)
-    {
+    public static function prepareEventStringMessage(
+        $event, $metadata = null, $message = null
+    ) {
         $response = null;
 
         if (is_null(self::$_markdown)) {
@@ -35,19 +37,17 @@ class EventManager
         }
 
         $factory = EventPolicyFactory::getInstance();
-
-
-        $type = $factory->getEventTypeById(intval($event['post_id']));
+        $type    = $factory->getEventTypeById($event['post_id']);
 
         if ($type) {
-            $message = $type->policy->MessageMarkdown ?? null;
+            $message = $message ?? $type->policy->MessageMarkdown;
 
             // Set default message
             if (!is_string($message) || empty($message)) {
                 $message = 'The event **${EVENT_TYPE.post_title}** occurred';
             }
 
-            $response = self::$_markdown->text($factory->hydrateString(
+            $response = self::$_markdown->line($factory->hydrateString(
                 $message,
                 array(
                     'eventType' => $type->post,

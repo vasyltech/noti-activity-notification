@@ -1,6 +1,6 @@
 <?php
 
-namespace ReactiveLog;
+namespace Noti;
 
 class Autoloader
 {
@@ -19,7 +19,7 @@ class Autoloader
      * @static
      */
     protected static $classmap = array(
-        'ReactiveLog\Vendor\Parsedown' => self::BASEDIR . '/parsedown/Parsedown.php',
+        'Noti\Vendor\Parsedown' => self::BASEDIR . '/parsedown/Parsedown.php',
         'Psr\Http\Message\MessageInterface' => self::BASEDIR . '/psr-http-message/MessageInterface.php',
         'Psr\Http\Message\RequestInterface' => self::BASEDIR . '/psr-http-message/RequestInterface.php',
         'Psr\Http\Message\ResponseInterface' => self::BASEDIR . '/psr-http-message/ResponseInterface.php',
@@ -47,7 +47,7 @@ class Autoloader
     );
 
     /**
-     * Auto-loader for project ReactiveLog
+     * Auto-loader for project
      *
      * @param string $class_name
      *
@@ -63,7 +63,7 @@ class Autoloader
 
         if (isset(self::$classmap[$class_name])) {
             $filename = self::$classmap[$class_name];
-        } elseif ($prefix === 'ReactiveLog') {
+        } elseif ($prefix === 'Noti') {
             $base_path = __DIR__ . '/application';
             $filename  = $base_path . '/' . implode('/', $chunks) . '.php';
         }
@@ -83,7 +83,7 @@ class Autoloader
      */
     public static function register()
     {
-        spl_autoload_register('\ReactiveLog\Autoloader::load');
+        spl_autoload_register('\Noti\Autoloader::load');
     }
 
 }

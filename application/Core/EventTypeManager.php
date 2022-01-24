@@ -1,6 +1,6 @@
 <?php
 
-namespace ReactiveLog\Core;
+namespace Noti\Core;
 
 class EventTypeManager
 {
@@ -19,16 +19,16 @@ class EventTypeManager
     {
         // Register Event Type CPT
         register_post_type('rl_event_type', array(
-            'label'        => __('Event Type', REACTIVE_LOG_KEY),
+            'label'        => __('Event Type', NOTI_KEY),
             'labels'       => array(
-                'name'          => __('Event Types', REACTIVE_LOG_KEY),
-                'edit_item'     => __('Edit Event Type', REACTIVE_LOG_KEY),
-                'singular_name' => __('Event Type', REACTIVE_LOG_KEY),
-                'add_new_item'  => __('Add New Event Type', REACTIVE_LOG_KEY),
-                'new_item'      => __('New Event Type', REACTIVE_LOG_KEY),
-                'item_updated'  => __('Event Type Updated', REACTIVE_LOG_KEY)
+                'name'          => __('Event Types', NOTI_KEY),
+                'edit_item'     => __('Edit Event Type', NOTI_KEY),
+                'singular_name' => __('Event Type', NOTI_KEY),
+                'add_new_item'  => __('Add New Event Type', NOTI_KEY),
+                'new_item'      => __('New Event Type', NOTI_KEY),
+                'item_updated'  => __('Event Type Updated', NOTI_KEY)
             ),
-            'description'  => __('Event type', REACTIVE_LOG_KEY),
+            'description'  => __('Event type', NOTI_KEY),
             'public'       => false,
             'show_ui'      => true,
             'show_in_menu' => false,
@@ -67,9 +67,9 @@ class EventTypeManager
             'hierarchical'      => false,
             'rewrite'           => true,
             'public'            => false,
-            'show_ui'           => true,
+            'show_ui'           => false,
             'show_in_nav_menus' => false,
-            'show_in_rest'      => true,
+            'show_in_rest'      => false,
             'capabilities'      => array(
                 'manage_terms'  => 'administrator',
                 'edit_terms'    => 'administrator',
@@ -98,7 +98,7 @@ class EventTypeManager
                     }
                 }
 
-                wp_redirect(admin_url('admin.php?page=reactivelog-types'));
+                wp_redirect(admin_url('admin.php?page=noti-types'));
                 exit;
             }
         });
@@ -118,7 +118,7 @@ class EventTypeManager
                     }
                 }
 
-                wp_redirect(admin_url('admin.php?page=reactivelog-types'));
+                wp_redirect(admin_url('admin.php?page=noti-types'));
                 exit;
             }
         });
@@ -132,7 +132,7 @@ class EventTypeManager
 
                     if (wp_verify_nonce($nonce, 'duplicate-post_' . $post->ID)) {
                         wp_insert_post(array(
-                            'post_title'   => __('Duplicate ', REACTIVE_LOG_KEY) . $post->post_title,
+                            'post_title'   => __('Duplicate ', NOTI_KEY) . $post->post_title,
                             'post_type'    => $post->post_type,
                             'post_content' => $post->post_content,
                             'post_excerpt' => $post->post_excerpt,
@@ -141,7 +141,7 @@ class EventTypeManager
                     }
                 }
 
-                wp_redirect(admin_url('admin.php?page=reactivelog-types'));
+                wp_redirect(admin_url('admin.php?page=noti-types'));
                 exit;
             }
         });
@@ -163,7 +163,7 @@ class EventTypeManager
                     }
                 }
 
-                wp_redirect(admin_url('admin.php?page=reactivelog-types'));
+                wp_redirect(admin_url('admin.php?page=noti-types'));
                 exit;
             }
         });
@@ -190,7 +190,7 @@ class EventTypeManager
                     }
                 }
 
-                wp_redirect(admin_url('admin.php?page=reactivelog-types'));
+                wp_redirect(admin_url('admin.php?page=noti-types'));
                 exit;
             }
         });
@@ -355,14 +355,14 @@ class EventTypeManager
             if (isset($json->RequiredVersion)) {
                 $required_version = $json->RequiredVersion;
             } else {
-                $required_version = __('Any', REACTIVE_LOG_KEY);
+                $required_version = __('Any', NOTI_KEY);
             }
 
             // Prepare description
             if (trim($type->post_excerpt)) {
                 $description = $type->post_excerpt;
             } else {
-                $description = __('No description provided', REACTIVE_LOG_KEY);
+                $description = __('No description provided', NOTI_KEY);
             }
 
             $response[] = array(

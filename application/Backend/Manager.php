@@ -1,6 +1,6 @@
 <?php
 
-namespace ReactiveLog\Backend;
+namespace Noti\Backend;
 
 class Manager
 {
@@ -8,9 +8,9 @@ class Manager
     private static $_instance = null;
 
     private $_pages = array(
-        'reactivelog',
-        'reactivelog-subscriber',
-        'reactivelog-types'
+        'noti',
+        'noti-types',
+        'noti-settings'
     );
 
     protected function __construct()
@@ -19,59 +19,78 @@ class Manager
             global $submenu;
 
             // add_menu_page(
-            //     __('Events', REACTIVE_LOG_KEY),
-            //     __('Events', REACTIVE_LOG_KEY),
+            //     __('Events', NOTI_KEY),
+            //     __('Events', NOTI_KEY),
             //     'administrator',
-            //     'reactivelog',
+            //     'noti',
             //     array($this, 'renderWelcomePage')
             // );
 
             add_menu_page(
-                __('Events', REACTIVE_LOG_KEY),
-                __('Events', REACTIVE_LOG_KEY),
+                __('Events', NOTI_KEY),
+                __('Events', NOTI_KEY),
                 'administrator',
-                'reactivelog',
+                'noti',
                 array($this, 'renderLogPage')
             );
 
             add_submenu_page(
-                'reactivelog',
-                __('Event Types', REACTIVE_LOG_KEY),
-                __('Event Types', REACTIVE_LOG_KEY),
+                'noti',
+                __('Event Types', NOTI_KEY),
+                __('Event Types', NOTI_KEY),
                 'administrator',
-                'reactivelog-types',
+                'noti-types',
                 array($this, 'renderEventTypesPage')
             );
 
             array_push(
-                $submenu['reactivelog'],
-                array( __( 'Categories' ), 'administrator', 'edit-tags.php?taxonomy=rl_event_type_category' )
+                $submenu['noti'],
+                array(
+                    __( 'Categories' ),
+                    'administrator',
+                    'edit-tags.php?taxonomy=rl_event_type_category'
+                )
             );
 
             add_submenu_page(
-                'reactivelog',
-                __('Settings', REACTIVE_LOG_KEY),
-                __('Settings', REACTIVE_LOG_KEY),
+                'noti',
+                __('Settings', NOTI_KEY),
+                __('Settings', NOTI_KEY),
                 'administrator',
-                'reactivelog-settings',
+                'noti-settings',
                 array($this, 'renderSettingsPage')
             );
+        });
+
+        add_filter('parent_file', function($parent_file) {
+            global $post;
+
+            if (is_a($post, 'WP_Post') && ($post->post_type === 'rl_event_type')) {
+                $parent_file = 'noti';
+            } elseif (
+                $parent_file === 'edit.php'
+                && filter_input(INPUT_GET, 'taxonomy') === 'rl_event_type_category'
+            ) {
+                $parent_file = 'noti';
+            }
+
+            return $parent_file;
         });
 
         add_action('admin_print_styles', function() {
             if (in_array(filter_input(INPUT_GET, 'page'), $this->_pages)) {
                 echo '<style>';
-                echo file_get_contents(REACTIVE_LOG_MEDIA . '/styles.css');
+                echo file_get_contents(NOTI_MEDIA . '/styles.css');
                 echo '</style>';
             }
         });
 
         add_filter('allowed_options', function($options) {
             return array_merge($options, array(
-                'reactivelog-settings' => array(
-                    'reactivelog-keep-logs',
-                    'reactivelog-cleanup-type',
-                    'reactivelog-notifications'
+                'noti-settings' => array(
+                    'noti-keep-logs',
+                    'noti-cleanup-type',
+                    'noti-notifications'
                 )
             ));
         });
@@ -79,17 +98,53 @@ class Manager
         add_action('admin_print_footer_scripts', function() {
             if (in_array(filter_input(INPUT_GET, 'page'), $this->_pages)) {
                 $locals = array(
-                    'apiEntpoint' => esc_url_raw(rest_url('reactivelog/v1')),
-                    'apiNonce' => wp_create_nonce('wp_rest')
+                    'apiEntpoint'    => esc_url_raw(rest_url('noti/v1')),
+                    'apiNonce'       => wp_create_nonce('wp_rest')
                 );
 
                 echo '<script type="text/javascript">';
-                echo 'var ReactiveLogLocals = ' . wp_json_encode($locals) . "\n";
-                echo file_get_contents(REACTIVE_LOG_MEDIA . '/dt.js') . "\n";
-                echo file_get_contents(REACTIVE_LOG_MEDIA . '/reactivelog.js');
+                echo 'var NotiLocals = ' . wp_json_encode($locals) . "\n";
+                echo file_get_contents(NOTI_MEDIA . '/dt.js') . "\n";
+                echo file_get_contents(NOTI_MEDIA . '/noti.js');
                 echo '</script>';
             }
         });
+
+        add_action( 'admin_enqueue_scripts', function() {
+            global $post;
+
+            $field = null;
+
+            if (filter_input(INPUT_GET, 'page') === 'noti-settings') {
+                $field = 'noti-notifications';
+            } elseif (
+                is_a($post, 'WP_Post')
+                && ($post->post_type === 'rl_event_type')
+            ) {
+                $field = 'event-type-content';
+            }
+
+            if (!is_null($field)) {
+                // Enqueue code editor and settings for manipulating HTML.
+                $settings = wp_enqueue_code_editor(
+                    array('type' => 'application/json')
+                );
+
+                // Bail if user disabled CodeMirror.
+                if ( false === $settings ) {
+                    return;
+                }
+
+                wp_add_inline_script(
+                    'code-editor',
+                    sprintf(
+                        'jQuery(() => wp.codeEditor.initialize("%s", %s));',
+                        $field,
+                        wp_json_encode($settings)
+                    )
+                );
+            }
+        } );
 
         //register custom access control metabox
         add_action('add_meta_boxes', array($this, 'registerMetaboxes'));
@@ -107,7 +162,7 @@ class Manager
             filter_input(INPUT_GET, 'post_type') === 'rl_event_type'
             && filter_input(INPUT_GET, 'trashed', FILTER_VALIDATE_INT) === 1
         ) {
-            wp_redirect(admin_url('admin.php?page=reactivelog-types')); exit;
+            wp_redirect(admin_url('admin.php?page=noti-types')); exit;
         }
     }
 
@@ -143,7 +198,7 @@ class Manager
         if (is_a($post, 'WP_Post') && ($post->post_type === 'rl_event_type')) {
             add_meta_box(
                 'raw-event-configuration',
-                __('Raw Event Configuration', REACTIVE_LOG_KEY),
+                __('Raw Event Configuration', NOTI_KEY),
                 function() {
                     require __DIR__ . '/Templates/event-editor.php';
                 },
@@ -154,7 +209,7 @@ class Manager
 
             add_meta_box(
                 'event-type-publisher',
-                __('Manage Status', REACTIVE_LOG_KEY),
+                __('Manage Status', NOTI_KEY),
                 function() {
                     require __DIR__ . '/Templates/manage-status-metabox.php';
                 },
@@ -173,4 +228,5 @@ class Manager
 
         return self::$_instance;
     }
+
 }

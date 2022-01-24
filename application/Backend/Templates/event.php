@@ -1,6 +1,6 @@
 <?php
 
-if (defined('REACTIVE_LOG_KEY')) {
+if (defined('NOTI_KEY')) {
 
     $num_posts   = wp_count_posts('rl_event_type', 'readable');
     $total_posts = $num_posts->publish + $num_posts->draft;
@@ -24,12 +24,12 @@ if (defined('REACTIVE_LOG_KEY')) {
 ?>
     <div class="wrap">
         <h1 class="wp-heading-inline">
-            <?php echo __('Event Types', REACTIVE_LOG_KEY); ?>
+            <?php echo __('Event Types', NOTI_KEY); ?>
             <a href="<?php echo esc_js(admin_url('post-new.php?post_type=rl_event_type')); ?>" class="page-title-action">Add New</a>
         </h1>
         <hr class="wp-header-end">
 
-        <input type="hidden" id="reactivelog-page-id" value="event-types" />
+        <input type="hidden" id="noti-page-id" value="event-types" />
 
         <ul class="subsubsub">
             <li class="any"><a href="#" class="current" aria-current="page">All <span class="count">(<?php echo $total_posts; ?>)</span></a> |</li>

@@ -1,6 +1,6 @@
 <?php
 
-namespace ReactiveLog\Core;
+namespace Noti\Core;
 
 class ListenerManager
 {

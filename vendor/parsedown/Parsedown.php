@@ -1,6 +1,6 @@
 <?php
 
-namespace ReactiveLog\Vendor;
+namespace Noti\Vendor;
 
 #
 #

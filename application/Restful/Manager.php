@@ -1,11 +1,11 @@
 <?php
 
-namespace ReactiveLog\Restful;
+namespace Noti\Restful;
 
 use WP_REST_Request,
-    ReactiveLog\Core\Repository,
-    ReactiveLog\Core\EventManager,
-    ReactiveLog\Core\EventTypeManager;
+    Noti\Core\Repository,
+    Noti\Core\EventManager,
+    Noti\Core\EventTypeManager;
 
 /**
  * Undocumented class
@@ -26,7 +26,7 @@ class Manager
     protected function __construct()
     {
         add_action('rest_api_init', function () {
-            register_rest_route('reactivelog/v1', '/events', array(
+            register_rest_route('noti/v1', '/events', array(
                 'methods' => 'GET',
                 'callback' => array($this, 'getEvents'),
                 'permission_callback' => function () {
@@ -34,7 +34,7 @@ class Manager
                 }
             ));
 
-            register_rest_route('reactivelog/v1', '/event-types', array(
+            register_rest_route('noti/v1', '/event-types', array(
                 'methods' => 'GET',
                 'callback' => array($this, 'getEventTypes'),
                 'permission_callback' => function () {
@@ -42,7 +42,7 @@ class Manager
                 }
             ));
 
-            register_rest_route('reactivelog/v1', '/bulk/event-type', array(
+            register_rest_route('noti/v1', '/bulk/event-type', array(
                 'methods' => 'PUT',
                 'callback' => array($this, 'updateEventTypes'),
                 'permission_callback' => function () {
@@ -98,7 +98,7 @@ class Manager
                 $time = $event['time'];
 
                 $response['data'][] = array(
-                    EventManager::prepareEventLogMessage($event, $meta),
+                    EventManager::prepareEventStringMessage($event, $meta),
                     $time . '<br/><b>' . $this->timestampToAgo($time) . '</b>',
                     isset($meta['user_ip']) ? $meta['user_ip'] : '----',
                     $event['counter']

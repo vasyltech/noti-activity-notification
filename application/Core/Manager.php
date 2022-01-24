@@ -1,6 +1,6 @@
 <?php
 
-namespace ReactiveLog\Core;
+namespace Noti\Core;
 
 class Manager
 {
@@ -17,6 +17,9 @@ class Manager
      */
     protected function __construct()
     {
+        // Bootstrap the Event Type manager
+        EventTypeManager::bootstrap();
+
         // Bootstrap the Event policy factory
         $factory = EventPolicyFactory::bootstrap();
 
@@ -36,7 +39,7 @@ class Manager
         }, 10, 2);
 
         add_action('noti_cleanup_log', function() {
-            Repository::trashOldLogs(get_option('reactivelog-keep-logs'));
+            Repository::deleteEventsAfter(get_option('noti-keep-logs'));
         });
 
         add_action('noti_send_notifications', function () {

@@ -1,6 +1,6 @@
 <?php
 
-namespace ReactiveLog\Core;
+namespace Noti\Core;
 
 use Vectorface\Whip\Whip,
     JsonPolicy\Core\Context,
@@ -62,8 +62,34 @@ class EventPolicyFactory
     public function getEventTypeById($id)
     {
         return array_pop(array_filter($this->_eventTypes, function($type) use ($id) {
-            return $type->post->ID === $id;
+            return $type->post->ID === intval($id);
         }));
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param [type] $id
+     *
+     * @return array
+     */
+    public function getEventTypeSubscribers($id)
+    {
+        $response = array();
+
+        $type = $this->getEventTypeById($id);
+
+        if ($type) {
+            if (!isset($type->subscribers)) {
+                $type->subscribers = wp_get_object_terms($id, 'rl_subscriber', array(
+                    'fields' => 'slugs'
+                ));
+            }
+
+            $response = $type->subscribers;
+        }
+
+        return $response;
     }
 
     /**

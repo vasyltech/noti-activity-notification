@@ -54,7 +54,7 @@
      *
      * @returns {Mixed}
      */
-    const GetLocal = (variable) => ReactiveLogLocals[variable];
+    const GetLocal = (variable) => NotiLocals[variable];
 
     /**
      * Log screen initialization
@@ -259,9 +259,6 @@
                                 action,
                                 ids
                             },
-                            beforeSend: function () {
-                                //$(_this).text(getAAM().__('Saving...')).attr('disabled', true);
-                            },
                             success: function (response) {
                                 //
                             },
@@ -388,7 +385,7 @@
     }
 
     $(document).ready(function () {
-        const screen = $('#reactivelog-page-id').val();
+        const screen = $('#noti-page-id').val();
 
         if (screen === 'log') {
             InitializeLogScreen();

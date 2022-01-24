@@ -1,8 +1,8 @@
 <?php
 
-use ReactiveLog\Core\Repository;
+use Noti\Core\Repository;
 
-if (defined('REACTIVE_LOG_KEY')) {
+if (defined('NOTI_KEY')) {
 
     // Hydrate the level list
     $levels = Repository::getEventLevelCounts();
@@ -13,12 +13,12 @@ if (defined('REACTIVE_LOG_KEY')) {
 ?>
     <div class="wrap">
         <h1 class="wp-heading-inline">
-            <?php echo __('Events', REACTIVE_LOG_KEY); ?>
+            <?php echo __('Events', NOTI_KEY); ?>
         </h1>
 
         <hr class="wp-header-end">
 
-        <input type="hidden" id="reactivelog-page-id" value="log" />
+        <input type="hidden" id="noti-page-id" value="log" />
         <ul class="subsubsub">
             <?php
             $list = array(
@@ -65,7 +65,7 @@ if (defined('REACTIVE_LOG_KEY')) {
 
         <div class="hidden" id="event-type-container">
             <select id="event-type">
-                <option value=""><?php echo __('Filter By Event Types', REACTIVE_LOG_KEY); ?></option>
+                <option value=""><?php echo __('Filter By Event Types', NOTI_KEY); ?></option>
                 <?php foreach ($types as $title => $id) { ?>
                     <option value="<?php echo intval($id); ?>"><?php echo esc_js($title); ?></option>
                 <?php } ?>

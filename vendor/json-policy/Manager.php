@@ -146,6 +146,16 @@ class Manager
     }
 
     /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    public function getPolicyTree()
+    {
+        return $this->_tree;
+    }
+
+    /**
      * Get marker manager
      *
      * @return JsonPolicy\Manager\MarkerManager

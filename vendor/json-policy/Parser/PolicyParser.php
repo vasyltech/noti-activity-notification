@@ -35,13 +35,13 @@ class PolicyParser
         $response = null;
         $decoded  = json_decode($policy);
 
-        if (is_object($decoded)) { // Is valid JSON structure?
+        if (is_object($decoded) || is_array($decoded)) { // Is valid JSON structure?
             if (is_scalar($decoded)) {
                 $response = ExpressionParser::parseToValue($decoded, $context);
             } else if (is_null($decoded)) {
                 $response = $decoded;
             } else {
-                $response = self::iterate($decoded, $context, 0);
+                $response = self::iterate($decoded, $context);
             }
         } else {
             $response = ExpressionParser::parseToValue($policy, $context);
@@ -56,7 +56,7 @@ class PolicyParser
      * @param object  $config
      * @param Context $context
      *
-     * @return object
+     * @return mixed
      *
      * @access protected
      * @static
@@ -73,6 +73,8 @@ class PolicyParser
                     $parsed_value = ExpressionParser::parseToValue(
                         $value, $context
                     );
+                } else if (is_null($value)) {
+                    $parsed_value = null;
                 } else {
                     $parsed_value = self::iterate($value, $context);
                 }

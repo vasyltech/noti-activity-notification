@@ -1,6 +1,6 @@
 <?php
 
-namespace ReactiveLog\Core;
+namespace Noti\Core;
 
 class Repository
 {
@@ -8,17 +8,22 @@ class Repository
     /**
      *
      */
-    const EVENT_STATUS_DEFAULT = 1;
+    const STATUS_DEFAULT = 0;
 
     /**
      *
      */
-    const EVENT_STATUS_NOTIFIED = 8;
+    const STATUS_DISCHARGED = 16;
 
     /**
      *
      */
-    const EVENT_STATUS_DELETED = 128;
+    const STATUS_NOTIFIED = 32;
+
+    /**
+     *
+     */
+    const STATUS_DELETED = 128;
 
     /**
      * Undocumented function
@@ -57,7 +62,7 @@ class Repository
         if ($last_id !== 0) {
             $table = $wpdb->prefix . 'rl_eventmeta';
 
-            foreach($metadata as $key => $value) {
+            foreach ($metadata as $key => $value) {
                 $q  = "INSERT INTO {$table} (`event_id`, `meta_key`, `meta_value`) ";
                 $q .= 'VALUES (%d, %s, %s) ON DUPLICATE KEY UPDATE `meta_value` = %s';
 
@@ -132,11 +137,11 @@ class Repository
         $query .= "WHERE e.status & %d = 0 ORDER BY p.post_title ASC";
 
         // Prepare the query
-        $sql = $wpdb->prepare($query, self::EVENT_STATUS_DELETED);
+        $sql = $wpdb->prepare($query, self::STATUS_DELETED);
 
         $response = array();
 
-        foreach($wpdb->get_results($sql, ARRAY_A) as $row) {
+        foreach ($wpdb->get_results($sql, ARRAY_A) as $row) {
             $response[$row['post_title']] = $row['post_id'];
         }
 
@@ -160,11 +165,11 @@ class Repository
         $query .= 'WHERE e.status & %d = 0 AND m.meta_key = %s GROUP BY m.meta_value';
 
         // Prepare the query
-        $sql = $wpdb->prepare($query, self::EVENT_STATUS_DELETED, 'level');
+        $sql = $wpdb->prepare($query, self::STATUS_DELETED, 'level');
 
         $response = array();
 
-        foreach($wpdb->get_results($sql, ARRAY_A) as $row) {
+        foreach ($wpdb->get_results($sql, ARRAY_A) as $row) {
             $response[$row['meta_value']] = $row['total'];
         }
 
@@ -184,14 +189,15 @@ class Repository
         $prefix  = $wpdb->prefix;
         $results = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT * FROM {$prefix}rl_eventmeta WHERE event_id = %d", $event_id
+                "SELECT * FROM {$prefix}rl_eventmeta WHERE event_id = %d",
+                $event_id
             ),
             ARRAY_A
         );
 
         $response = [];
 
-        foreach($results as $row) {
+        foreach ($results as $row) {
             $response[$row['meta_key']] = maybe_unserialize($row['meta_value']);
         }
 
@@ -202,9 +208,10 @@ class Repository
      * Undocumented function
      *
      * @param integer $days
+     *
      * @return void
      */
-    public static function trashOldLogs($days = 60)
+    public static function deleteEventsAfter($days = 60)
     {
         global $wpdb;
 
@@ -213,7 +220,53 @@ class Repository
         $q  = "UPDATE {$table} SET `status` = `status` | %d WHERE ";
         $q .= 'DATEDIFF(NOW(), IFNULL(last_occurrence_at, first_occurrence_at)) > %d';
 
-        return $wpdb->query($wpdb->prepare($q, self::EVENT_STATUS_DELETED, $days));
+        return $wpdb->query($wpdb->prepare($q, self::STATUS_DELETED, $days));
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param array $eventIds
+     * @param integer $status
+     *
+     * @return void
+     */
+    public static function updateEventsStatus(array $eventIds, int $status)
+    {
+        global $wpdb;
+
+        $table = $wpdb->prefix . 'rl_events';
+
+        $q  = "UPDATE {$table} SET `status` = `status` | %d WHERE id IN (";
+        $q .= implode(',', array_fill(0, count($eventIds), '%d')) . ')';
+
+        return $wpdb->query($wpdb->prepare($q, $status, ...$eventIds));
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param array $ids
+     *
+     * @return void
+     */
+    public static function updateEventsAttempts(array $ids)
+    {
+        global $wpdb;
+
+        $table = $wpdb->prefix . 'rl_eventmeta';
+
+        $q  = "INSERT INTO {$table} (`event_id`, `meta_key`, `meta_value`)";
+        $q .= 'VALUES ' . implode(',', array_fill(0, count($ids), '(%d,%s,%d)'));
+        $q .= ' ON DUPLICATE KEY UPDATE `meta_value` = `meta_value` + 1';
+
+        $args = array();
+
+        foreach($ids as $id) {
+            array_push($args, ...array($id, '__attempt', 1));
+        }
+
+        return $wpdb->query($wpdb->prepare($q, ...$args));
     }
 
     /**
@@ -223,20 +276,26 @@ class Repository
      *
      * @return array
      */
-    public static function getSealedNewEvents($limit = 100)
+    public static function getPendingForNotificationEvents($limit = 100)
     {
         global $wpdb;
 
         $table = $wpdb->prefix . 'rl_events';
         $now   = date('Y-m-d H:i:s');
 
-        $query  = "SELECT * FROM {$table} WHERE (`sealed_at` < %s) && ";
-        $query .= "(`status` & %d = 0) ORDER BY `sealed_at` ASC LIMIT %d";
+        $query  = "SELECT e.*, m.meta_value AS `attempt` FROM {$table} AS e ";
+        $query .= "LEFT JOIN {$wpdb->prefix}rl_eventmeta AS m ON ";
+        $query .= "(e.id = m.event_id AND m.`meta_key` = %s) WHERE ";
+        $query .= "(e.`sealed_at` < %s) && (e.`status` & %d = 0) ORDER BY ";
+        $query .= "e.`sealed_at` ASC LIMIT %d";
 
-        return $wpdb->get_results(
-            $wpdb->prepare($query, $now, self::EVENT_STATUS_NOTIFIED, $limit),
-            ARRAY_A
-        );
+        return $wpdb->get_results($wpdb->prepare(
+            $query,
+            '__attempt',
+            $now,
+            self::STATUS_NOTIFIED | self::STATUS_DISCHARGED | self::STATUS_DELETED,
+            $limit
+        ), ARRAY_A);
     }
 
     /**
@@ -252,7 +311,7 @@ class Repository
         global $wpdb;
 
         $where = array('(e.`status` & %d = 0)');
-        $args  = array(self::EVENT_STATUS_DELETED);
+        $args  = array(self::STATUS_DELETED);
 
         if (!empty($filters['search'])) {
             $where[] = '(m.meta_value LIKE %s)';
@@ -276,7 +335,8 @@ class Repository
 
         if (count($where)) {
             $sql = $wpdb->prepare(
-                $query . ' WHERE ' . implode(' AND ', $where), ...$args
+                $query . ' WHERE ' . implode(' AND ', $where),
+                ...$args
             );
         } else {
             $sql = $query;
@@ -284,5 +344,4 @@ class Repository
 
         return $sql;
     }
-
 }
