@@ -159,7 +159,7 @@ class NotificationManager
 
             if ($notification->Type === 'email') {
                 $subscribers = $factory->getEventTypeSubscribers(
-                    $event['post_id']
+                    $event['post_id'], $event['site_id']
                 );
                 $packages[$notification->Type]->Receivers = array();
 
@@ -259,7 +259,7 @@ class NotificationManager
     private static function _getGlobalPolicy()
     {
         if (is_null(self::$_globalPolicy)) {
-            $json = get_option('noti-notifications', '[]');
+            $json = OptionManager::getOption('noti-notifications', '[]');
 
             if (is_string($json)) {
                 $manager = EventPolicyFactory::getInstance()->hydrate($json);

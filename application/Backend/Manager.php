@@ -48,7 +48,7 @@ class Manager
                 array(
                     __( 'Categories' ),
                     'administrator',
-                    'edit-tags.php?taxonomy=rl_event_type_category'
+                    'edit-tags.php?taxonomy=noti_event_type_cat'
                 )
             );
 
@@ -65,11 +65,11 @@ class Manager
         add_filter('parent_file', function($parent_file) {
             global $post;
 
-            if (is_a($post, 'WP_Post') && ($post->post_type === 'rl_event_type')) {
+            if (is_a($post, 'WP_Post') && ($post->post_type === 'noti_event_type')) {
                 $parent_file = 'noti';
             } elseif (
                 $parent_file === 'edit.php'
-                && filter_input(INPUT_GET, 'taxonomy') === 'rl_event_type_category'
+                && filter_input(INPUT_GET, 'taxonomy') === 'noti_event_type_cat'
             ) {
                 $parent_file = 'noti';
             }
@@ -119,7 +119,7 @@ class Manager
                 $field = 'noti-notifications';
             } elseif (
                 is_a($post, 'WP_Post')
-                && ($post->post_type === 'rl_event_type')
+                && ($post->post_type === 'noti_event_type')
             ) {
                 $field = 'event-type-content';
             }
@@ -152,14 +152,14 @@ class Manager
         add_action("in_admin_header", function() {
             global $post;
 
-            if (is_a($post, 'WP_Post') && ($post->post_type === 'rl_event_type')) {
-                remove_meta_box('submitdiv', 'rl_event_type', 'side');
+            if (is_a($post, 'WP_Post') && ($post->post_type === 'noti_event_type')) {
+                remove_meta_box('submitdiv', 'noti_event_type', 'side');
             }
 
         }, 999);
 
         if (
-            filter_input(INPUT_GET, 'post_type') === 'rl_event_type'
+            filter_input(INPUT_GET, 'post_type') === 'noti_event_type'
             && filter_input(INPUT_GET, 'trashed', FILTER_VALIDATE_INT) === 1
         ) {
             wp_redirect(admin_url('admin.php?page=noti-types')); exit;
@@ -195,7 +195,7 @@ class Manager
     {
         global $post;
 
-        if (is_a($post, 'WP_Post') && ($post->post_type === 'rl_event_type')) {
+        if (is_a($post, 'WP_Post') && ($post->post_type === 'noti_event_type')) {
             add_meta_box(
                 'raw-event-configuration',
                 __('Raw Event Configuration', NOTI_KEY),

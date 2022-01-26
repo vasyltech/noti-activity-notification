@@ -2,7 +2,7 @@
 
 if (defined('NOTI_KEY')) {
 
-    $num_posts   = wp_count_posts('rl_event_type', 'readable');
+    $num_posts   = wp_count_posts('noti_event_type', 'readable');
     $total_posts = $num_posts->publish + $num_posts->draft;
     $has_trashed = false;
 
@@ -12,12 +12,12 @@ if (defined('NOTI_KEY')) {
 
 
     $categories = wp_dropdown_categories(array(
-        'show_option_all' => get_taxonomy('rl_event_type_category')->labels->all_items,
+        'show_option_all' => get_taxonomy('noti_event_type_cat')->labels->all_items,
         'hide_empty'      => 0,
         'hierarchical'    => 1,
         'show_count'      => 0,
         'orderby'         => 'name',
-        'taxonomy'        => 'rl_event_type_category',
+        'taxonomy'        => 'noti_event_type_cat',
         'echo'            => 0
     ));
 
@@ -25,7 +25,7 @@ if (defined('NOTI_KEY')) {
     <div class="wrap">
         <h1 class="wp-heading-inline">
             <?php echo __('Event Types', NOTI_KEY); ?>
-            <a href="<?php echo esc_js(admin_url('post-new.php?post_type=rl_event_type')); ?>" class="page-title-action">Add New</a>
+            <a href="<?php echo esc_js(admin_url('post-new.php?post_type=noti_event_type')); ?>" class="page-title-action">Add New</a>
         </h1>
         <hr class="wp-header-end">
 

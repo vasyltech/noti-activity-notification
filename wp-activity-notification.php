@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Plugin Name: Noti - Activity Notification
+ * Plugin Name: WP Activity Notification
  * Description: Track any activity and notify them in the near-to-realtime
  * Version: 0.0.1
  * Author: Vasyl Martyniuk <vasyl@vasyltech.com>

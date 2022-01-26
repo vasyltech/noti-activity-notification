@@ -39,7 +39,23 @@ class Manager
         }, 10, 2);
 
         add_action('noti_cleanup_log', function() {
-            Repository::deleteEventsAfter(get_option('noti-keep-logs'));
+            $type = OptionManager::getOption('noti-cleanup-type', 'soft');
+
+            if ($type === 'soft') {
+                Repository::deleteEventsStatusAfter(
+                    OptionManager::getOption('noti-keep-logs', 60),
+                    Repository::STATUS_DELETED
+                );
+            } else {
+                $ids = Repository::getEventIdsOlderThen(
+                    OptionManager::getOption('noti-keep-logs', 60)
+                );
+
+                if (count($ids)) {
+                    Repository::purgeEvents($ids);
+                    Repository::purgeEventMetaByEventIds($ids);
+                }
+            }
         });
 
         add_action('noti_send_notifications', function () {
@@ -93,7 +109,7 @@ class Manager
 
             if ($manager->isApplicable()) {
                 // If there is aggregation, let's calculate the unique group
-                $group  = array($eventType->post_id);
+                $group  = array();
                 $sealed = $now;
 
                 if (isset($manager->Aggregate)) {
@@ -131,12 +147,24 @@ class Manager
                     $group[] = $now;
                 }
 
+                // Let's generate the group hash
+                if (in_array('crc32', hash_algos(), true)) {
+                    $hash = hash('crc32', implode('', $group));
+                } elseif (function_exists('crc32')) {
+                    $hash = str_pad(
+                        dechex(crc32(implode('', $group))), 8, '0', STR_PAD_LEFT
+                    );
+                } else {
+                    $hash = substr(md5(implode('', $group)), 0, 8);
+                }
+
                 // Now, let's store the event
                 Repository::insertEvent(array(
+                    'site_id'    => get_current_blog_id(),
                     'post_id'    => $eventType->post_id,
                     'created_at' => date('Y-m-d H:i:s'),
                     'sealed_at'  => date('Y-m-d H:i:s', $sealed),
-                    'group'      => md5(implode('', $group))
+                    'hash'      => $hash
                 ), $this->prepareEventMetadata($manager));
             }
         };

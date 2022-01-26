@@ -1,3 +1,9 @@
+<?php
+
+use Noti\Core\OptionManager;
+
+?>
+
 <div class="wrap">
     <h1>Settings</h1>
 
@@ -5,7 +11,9 @@
     // Prepare the raw settings for displaying
     $raw   = null;
     $error = null;
-    $json  = get_option('noti-notifications');
+    $json  = OptionManager::getOption('noti-notifications');
+    $keep  = OptionManager::getOption('noti-keep-logs', 60);
+    $type  = OptionManager::getOption('noti-cleanup-type', 'soft');
 
     if ($json) {
         $json = json_decode($json);
@@ -34,7 +42,7 @@
                         <label for="noti-keep-logs">Keep Event Logs For</label>
                     </th>
                     <td>
-                        <input name="noti-keep-logs" type="number" id="noti-keep-logs" value="<?php echo get_option('noti-keep-logs', 60); ?>" class="regular-text" />
+                        <input name="noti-keep-logs" type="number" id="noti-keep-logs" value="<?php echo intval($keep); ?>" class="regular-text" />
                         <p class="description" id="noti-keep-logs-description">Automatically clean-up log events that were created after X number of days.</p>
                     </td>
                 </tr>
@@ -43,7 +51,6 @@
                     <td>
                         <fieldset>
                             <legend class="screen-reader-text"><span>Clean-Up Type</span></legend>
-                            <?php $type = get_option('noti-cleanup-type', 'soft'); ?>
                             <label><input type="radio" name="noti-cleanup-type" value="soft" <?php echo ($type === 'soft' ? 'checked="checked"' : ''); ?>> <span class="date-time-text format-i18n">Soft Delete (mark events as deleted, however, keep them stored in the database indefinitely)</span></label><br>
                             <label><input type="radio" name="noti-cleanup-type" value="hard" <?php echo ($type === 'hard' ? 'checked="checked"' : ''); ?>> <span class="date-time-text format-i18n">Permanent Delete (permanently delete events that exceeded number of days specified with "Keep Event Logs For" setting)</span></label>
                         </fieldset>

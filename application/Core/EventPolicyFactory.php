@@ -69,11 +69,12 @@ class EventPolicyFactory
     /**
      * Undocumented function
      *
-     * @param [type] $id
+     * @param integer $id
+     * @param integer $site_id
      *
      * @return array
      */
-    public function getEventTypeSubscribers($id)
+    public function getEventTypeSubscribers($id, $site_id)
     {
         $response = array();
 
@@ -81,12 +82,16 @@ class EventPolicyFactory
 
         if ($type) {
             if (!isset($type->subscribers)) {
-                $type->subscribers = wp_get_object_terms($id, 'rl_subscriber', array(
-                    'fields' => 'slugs'
-                ));
+                $type->subscribers = array();
             }
 
-            $response = $type->subscribers;
+            if (!isset($type->subscribers[$site_id])) {
+                $type->subscribers[$site_id] = Repository::getEventTypeSubscribers(
+                    $id, $site_id
+                );
+            }
+
+            $response = $type->subscribers[$site_id];
         }
 
         return $response;
@@ -107,7 +112,7 @@ class EventPolicyFactory
         }
 
         $types = get_posts(array(
-            'post_type'   => 'rl_event_type',
+            'post_type'   => 'noti_event_type',
             'numberposts' => -1,
             'post_status' => array('publish', 'draft'),
         ));
@@ -471,13 +476,7 @@ class EventPolicyFactory
      */
     public static function getWPOption($option)
     {
-        if (is_multisite()) {
-            $result = get_blog_option(get_current_blog_id(), $option);
-        } else {
-            $result = get_option($option);
-        }
-
-        return $result;
+        return OptionManager::getOption($option);
     }
 
     /**

@@ -133,7 +133,7 @@ class Manager
             $filters['post_status'] = $post_status;
         }
 
-        $num_posts = wp_count_posts('rl_event_type', 'readable');
+        $num_posts = wp_count_posts('noti_event_type', 'readable');
 
         if ($post_status === 'trash') {
             $total_posts = $num_posts->trash;
@@ -143,7 +143,7 @@ class Manager
 
         // Getting total number of filtered items
         $ids = get_posts(array_merge(array(
-            'post_type'   => 'rl_event_type',
+            'post_type'   => 'noti_event_type',
             'numberposts' => -1,
             'fields'      => 'ids',
             'post_status' => 'any'
@@ -213,26 +213,21 @@ class Manager
                 }
             } else if ($action === 'subscribe') {
                 if (current_user_can('administrator')) {
-                    wp_set_post_terms(
-                        $id,
-                        get_current_user_id(),
-                        'rl_subscriber',
-                        true
-                    );
+                    Repository::updateSubscription(array(
+                        'site_id'       => get_current_blog_id(),
+                        'post_id'       => $id,
+                        'user_id'       => get_current_user_id(),
+                        'is_subscribed' => 1
+                    ));
                 }
             } else if ($action === 'unsubscribe') {
                 if (current_user_can('administrator')) {
-                    $term = get_term_by(
-                        'slug', get_current_user_id(), 'rl_subscriber'
-                    );
-
-                    if (is_a($term, 'WP_Term')) {
-                        wp_remove_object_terms(
-                            $id,
-                            $term->term_id,
-                            'rl_subscriber'
-                        );
-                    }
+                    Repository::updateSubscription(array(
+                        'site_id'       => get_current_blog_id(),
+                        'post_id'       => $id,
+                        'user_id'       => get_current_user_id(),
+                        'is_subscribed' => 0
+                    ));
                 }
             }
         }

@@ -67,7 +67,7 @@
             pagingType: 'full_numbers',
             ordering: false,
             processing: true,
-            stateSave: false,
+            stateSave: true,
             serverSide: true,
             ajax: {
                 url: GetLocal('apiEntpoint') + '/events',
@@ -181,7 +181,7 @@
             pagingType: 'full_numbers',
             ordering: false,
             processing: true,
-            stateSave: false,
+            stateSave: true,
             serverSide: true,
             ajax: {
                 url: GetLocal('apiEntpoint') + '/event-types',

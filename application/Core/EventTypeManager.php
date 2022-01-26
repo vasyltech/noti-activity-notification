@@ -18,7 +18,7 @@ class EventTypeManager
     protected function __construct()
     {
         // Register Event Type CPT
-        register_post_type('rl_event_type', array(
+        register_post_type('noti_event_type', array(
             'label'        => __('Event Type', NOTI_KEY),
             'labels'       => array(
                 'name'          => __('Event Types', NOTI_KEY),
@@ -48,7 +48,7 @@ class EventTypeManager
             )
         ));
 
-        register_taxonomy('rl_event_type_category', 'rl_event_type', array(
+        register_taxonomy('noti_event_type_cat', 'noti_event_type', array(
             'hierarchical'      => true,
             'rewrite'           => true,
             'public'            => false,
@@ -63,30 +63,10 @@ class EventTypeManager
             )
         ));
 
-        register_taxonomy('rl_subscriber', 'rl_event_type', array(
-            'hierarchical'      => false,
-            'rewrite'           => true,
-            'public'            => false,
-            'show_ui'           => false,
-            'show_in_nav_menus' => false,
-            'show_in_rest'      => false,
-            'capabilities'      => array(
-                'manage_terms'  => 'administrator',
-                'edit_terms'    => 'administrator',
-                'delete_terms'  => 'administrator',
-                'assign_terms'  => 'administrator'
-            ),
-            'labels' => array (
-                'name'          => 'Subscribers',
-                'singular_name' => 'Subscriber',
-                'separate_items_with_commas' => 'Separate User IDs with comma'
-            )
-        ));
-
         add_action('post_action_deactivate', function ($id) {
             $post = get_post($id);
 
-            if (is_a($post, 'WP_Post') && $post->post_type === 'rl_event_type') {
+            if (is_a($post, 'WP_Post') && $post->post_type === 'noti_event_type') {
                 if (current_user_can('publish_post', $post->ID)) {
                     $nonce = filter_input(INPUT_GET, '_wpnonce');
 
@@ -106,7 +86,7 @@ class EventTypeManager
         add_action('post_action_activate', function ($id) {
             $post = get_post($id);
 
-            if (is_a($post, 'WP_Post') && $post->post_type === 'rl_event_type') {
+            if (is_a($post, 'WP_Post') && $post->post_type === 'noti_event_type') {
                 if (current_user_can('publish_post', $post->ID)) {
                     $nonce = filter_input(INPUT_GET, '_wpnonce');
 
@@ -126,7 +106,7 @@ class EventTypeManager
         add_action('post_action_duplicate', function ($id) {
             $post = get_post($id);
 
-            if (is_a($post, 'WP_Post') && $post->post_type === 'rl_event_type') {
+            if (is_a($post, 'WP_Post') && $post->post_type === 'noti_event_type') {
                 if (current_user_can('edit_posts')) {
                     $nonce = filter_input(INPUT_GET, '_wpnonce');
 
@@ -149,17 +129,17 @@ class EventTypeManager
         add_action('post_action_subscribe', function ($id) {
             $post = get_post($id);
 
-            if (is_a($post, 'WP_Post') && $post->post_type === 'rl_event_type') {
+            if (is_a($post, 'WP_Post') && $post->post_type === 'noti_event_type') {
                 if (current_user_can('administrator')) {
                     $nonce = filter_input(INPUT_GET, '_wpnonce');
 
                     if (wp_verify_nonce($nonce, 'subscribe-post_' . $post->ID)) {
-                        wp_set_post_terms(
-                            $id,
-                            get_current_user_id(),
-                            'rl_subscriber',
-                            true
-                        );
+                        Repository::updateSubscription(array(
+                            'site_id'       => get_current_blog_id(),
+                            'post_id'       => $post->ID,
+                            'user_id'       => get_current_user_id(),
+                            'is_subscribed' => 1
+                        ));
                     }
                 }
 
@@ -171,22 +151,17 @@ class EventTypeManager
         add_action('post_action_unsubscribe', function ($id) {
             $post = get_post($id);
 
-            if (is_a($post, 'WP_Post') && $post->post_type === 'rl_event_type') {
+            if (is_a($post, 'WP_Post') && $post->post_type === 'noti_event_type') {
                 if (current_user_can('administrator')) {
                     $nonce = filter_input(INPUT_GET, '_wpnonce');
 
                     if (wp_verify_nonce($nonce, 'unsubscribe-post_' . $post->ID)) {
-                        $term = get_term_by(
-                            'slug', get_current_user_id(), 'rl_subscriber'
-                        );
-
-                        if (is_a($term, 'WP_Term')) {
-                            wp_remove_object_terms(
-                                $id,
-                                $term->term_id,
-                                'rl_subscriber'
-                            );
-                        }
+                        Repository::updateSubscription(array(
+                            'site_id'       => get_current_blog_id(),
+                            'post_id'       => $post->ID,
+                            'user_id'       => get_current_user_id(),
+                            'is_subscribed' => 0
+                        ));
                     }
                 }
 
@@ -207,7 +182,7 @@ class EventTypeManager
      */
     public function manageEventTypeContent($data)
     {
-        if (isset($data['post_type']) && ($data['post_type'] === 'rl_event_type')) {
+        if (isset($data['post_type']) && ($data['post_type'] === 'noti_event_type')) {
             $content = filter_input(INPUT_POST, 'event-type-content');
 
             if (empty($content)) {
@@ -241,7 +216,7 @@ class EventTypeManager
         if (!empty($filters['category'])) {
             $filters['tax_query'] = array(
                 array(
-                    'taxonomy' => 'rl_event_type_category',
+                    'taxonomy' => 'noti_event_type_cat',
                     'terms'    => $filters['category']
                 )
             );
@@ -249,7 +224,7 @@ class EventTypeManager
         }
 
         $types = get_posts(array_merge(array(
-            'post_type'   => 'rl_event_type',
+            'post_type'   => 'noti_event_type',
             'numberposts' => $length,
             'post_status' => 'any',
             'offset'      => $offset
@@ -323,12 +298,11 @@ class EventTypeManager
             }
 
             if (current_user_can('administrator')) {
-                $terms = wp_get_object_terms(
-                    $type->ID,
-                    'rl_subscriber',
-                    array('fields' => 'slugs')
+                $status = Repository::getUserSubscriptionStatus(
+                    get_current_blog_id(), $type->ID, get_current_user_id()
                 );
-                if (in_array(get_current_user_id(), $terms)) {
+
+                if ($status === 1) {
                     $actions['unsubscribe'] = wp_nonce_url(
                         admin_url(
                             sprintf(
