@@ -49,6 +49,14 @@ class Manager
                     return current_user_can('administrator');
                 }
             ));
+
+            register_rest_route('noti/v1', '/setup', array(
+                'methods' => 'POST',
+                'callback' => array($this, 'setup'),
+                'permission_callback' => function () {
+                    return current_user_can('administrator');
+                }
+            ));
         });
     }
 
@@ -233,6 +241,28 @@ class Manager
         }
 
         return $ids;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    public function setup()
+    {
+        global $wpdb;
+
+        if (!function_exists('dbDelta')) {
+            require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+
+            $sql = str_replace(
+                '%prefix%',
+                $wpdb->prefix,
+                file_get_contents(NOTI_BASEDIR . '/setup/db.sql')
+            );
+
+            dbDelta($sql);
+        }
     }
 
     /**

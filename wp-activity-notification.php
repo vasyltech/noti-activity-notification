@@ -131,6 +131,7 @@ class NotiActivityNotification
 if (defined('ABSPATH')) {
     // Define some global constants
     define('NOTI_KEY', 'noti');
+    define('NOTI_BASEDIR', __DIR__);
     define('NOTI_MEDIA', __DIR__ . '/media');
 
     // Register autoloader

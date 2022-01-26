@@ -384,6 +384,30 @@
         });
     }
 
+    const InitializeWelcomeScreen = () => {
+        $('#setup').bind('click', function() {
+            $(this).attr('disabled', true);
+            $(this).val('Configuring Plugin. Please wait...');
+
+            $.ajax(GetLocal('apiEntpoint') + '/setup', {
+                type: 'POST',
+                dataType: 'json',
+                headers: {
+                    'X-WP-Nonce': GetLocal('apiNonce')
+                },
+                success: function (response) {
+                    //
+                },
+                error: function () {
+                    //
+                },
+                complete: function () {
+                    console.log('done');
+                }
+            });
+        });
+    }
+
     $(document).ready(function () {
         const screen = $('#noti-page-id').val();
 
@@ -391,6 +415,8 @@
             InitializeLogScreen();
         } else if (screen === 'event-types') {
             InitializeEventTypeScreen();
+        } else if (screen === 'welcome') {
+            InitializeWelcomeScreen();
         }
     });
 })(jQuery);
