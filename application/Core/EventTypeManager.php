@@ -5,6 +5,10 @@ namespace Noti\Core;
 class EventTypeManager
 {
 
+    const EVENT_TYPE = 'noti_event_type';
+
+    const EVENT_TYPE_CATEGORY = 'noti_event_type_cat';
+
     /**
      * Undocumented variable
      *
@@ -18,7 +22,7 @@ class EventTypeManager
     protected function __construct()
     {
         // Register Event Type CPT
-        register_post_type('noti_event_type', array(
+        register_post_type(self::EVENT_TYPE, array(
             'label'        => __('Event Type', NOTI_KEY),
             'labels'       => array(
                 'name'          => __('Event Types', NOTI_KEY),
@@ -48,7 +52,7 @@ class EventTypeManager
             )
         ));
 
-        register_taxonomy('noti_event_type_cat', 'noti_event_type', array(
+        register_taxonomy(self::EVENT_TYPE_CATEGORY, self::EVENT_TYPE, array(
             'hierarchical'      => true,
             'rewrite'           => true,
             'public'            => false,
@@ -66,7 +70,7 @@ class EventTypeManager
         add_action('post_action_deactivate', function ($id) {
             $post = get_post($id);
 
-            if (is_a($post, 'WP_Post') && $post->post_type === 'noti_event_type') {
+            if (is_a($post, 'WP_Post') && $post->post_type === self::EVENT_TYPE) {
                 if (current_user_can('publish_post', $post->ID)) {
                     $nonce = filter_input(INPUT_GET, '_wpnonce');
 
@@ -86,7 +90,7 @@ class EventTypeManager
         add_action('post_action_activate', function ($id) {
             $post = get_post($id);
 
-            if (is_a($post, 'WP_Post') && $post->post_type === 'noti_event_type') {
+            if (is_a($post, 'WP_Post') && $post->post_type === self::EVENT_TYPE) {
                 if (current_user_can('publish_post', $post->ID)) {
                     $nonce = filter_input(INPUT_GET, '_wpnonce');
 
@@ -106,17 +110,19 @@ class EventTypeManager
         add_action('post_action_duplicate', function ($id) {
             $post = get_post($id);
 
-            if (is_a($post, 'WP_Post') && $post->post_type === 'noti_event_type') {
+            if (is_a($post, 'WP_Post') && $post->post_type === self::EVENT_TYPE) {
                 if (current_user_can('edit_posts')) {
                     $nonce = filter_input(INPUT_GET, '_wpnonce');
 
                     if (wp_verify_nonce($nonce, 'duplicate-post_' . $post->ID)) {
                         wp_insert_post(array(
-                            'post_title'   => __('Duplicate ', NOTI_KEY) . $post->post_title,
-                            'post_type'    => $post->post_type,
-                            'post_content' => $post->post_content,
-                            'post_excerpt' => $post->post_excerpt,
-                            'post_status'  => 'draft'
+                            'post_title'     => __('Duplicate ', NOTI_KEY) . $post->post_title,
+                            'post_type'      => $post->post_type,
+                            'post_content'   => $post->post_content,
+                            'post_excerpt'   => $post->post_excerpt,
+                            'post_status'    => 'draft',
+                            'comment_status' => 'closed',
+                            'ping_status'    => 'closed'
                         ));
                     }
                 }
@@ -127,9 +133,12 @@ class EventTypeManager
         });
 
         add_action('post_action_subscribe', function ($id) {
+            // Current, we allow to ONLY subscribe to event types in other sites
+            Helper::switchToMainSite();
             $post = get_post($id);
+            Helper::restoreCurrentSite();
 
-            if (is_a($post, 'WP_Post') && $post->post_type === 'noti_event_type') {
+            if (is_a($post, 'WP_Post') && $post->post_type === self::EVENT_TYPE) {
                 if (current_user_can('administrator')) {
                     $nonce = filter_input(INPUT_GET, '_wpnonce');
 
@@ -151,7 +160,7 @@ class EventTypeManager
         add_action('post_action_unsubscribe', function ($id) {
             $post = get_post($id);
 
-            if (is_a($post, 'WP_Post') && $post->post_type === 'noti_event_type') {
+            if (is_a($post, 'WP_Post') && $post->post_type === self::EVENT_TYPE) {
                 if (current_user_can('administrator')) {
                     $nonce = filter_input(INPUT_GET, '_wpnonce');
 
@@ -182,7 +191,7 @@ class EventTypeManager
      */
     public function manageEventTypeContent($data)
     {
-        if (isset($data['post_type']) && ($data['post_type'] === 'noti_event_type')) {
+        if (isset($data['post_type']) && ($data['post_type'] === self::EVENT_TYPE)) {
             $content = filter_input(INPUT_POST, 'event-type-content');
 
             if (empty($content)) {
@@ -208,15 +217,12 @@ class EventTypeManager
      */
     public function getEventTypes($filters, $length = 10, $offset = 0)
     {
-        if (is_multisite()) {
-            // All event types are global and live in the main site
-            switch_to_blog($this->getMainSiteId());
-        }
+        Helper::switchToMainSite();
 
         if (!empty($filters['category'])) {
             $filters['tax_query'] = array(
                 array(
-                    'taxonomy' => 'noti_event_type_cat',
+                    'taxonomy' => self::EVENT_TYPE_CATEGORY,
                     'terms'    => $filters['category']
                 )
             );
@@ -224,15 +230,13 @@ class EventTypeManager
         }
 
         $types = get_posts(array_merge(array(
-            'post_type'   => 'noti_event_type',
+            'post_type'   => self::EVENT_TYPE,
             'numberposts' => $length,
             'post_status' => 'any',
             'offset'      => $offset
         ), $filters));
 
-        if (is_multisite()) {
-            restore_current_blog();
-        }
+        Helper::restoreCurrentSite();
 
         // Preparing the list by checking permissions
         $response = [];
@@ -350,36 +354,6 @@ class EventTypeManager
         }
 
         return $response;
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @return void
-     */
-    protected function getMainSiteId()
-    {
-        if (function_exists('get_main_site_id')) {
-            $id = get_main_site_id();
-        } elseif (is_multisite()) {
-            $network = get_network();
-            $id      = ($network ? $network->site_id : 0);
-        } else {
-            $id = get_current_blog_id();
-        }
-
-        return $id;
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @return void
-     */
-    public function setup()
-    {
-        if (is_multisite()) {
-        }
     }
 
     /**

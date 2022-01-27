@@ -175,7 +175,6 @@ class Manager
                 $type['id'],
                 esc_js($type['title']),
                 esc_js($type['description']),
-                $type['scopes'],
                 $type['status'],
                 $type['actions'],
                 esc_js($type['required_version'])
@@ -262,6 +261,47 @@ class Manager
             );
 
             dbDelta($sql);
+
+            // The next step is to insert all the event types & categories
+            $types = json_decode(file_get_contents(
+                NOTI_BASEDIR . '/setup/event-types.json'
+            ));
+
+            foreach ($types as $type) {
+                $existing = Repository::getPostTypeByGuid($type->guid);
+
+                if (empty($existing->ID)) {
+                    $post_id = wp_insert_post(array(
+                        'post_type'      => EventTypeManager::EVENT_TYPE,
+                        'post_title'     => $type->title,
+                        'post_excerpt'   => $type->excerpt,
+                        'post_status'    => $type->status === 'active' ? 'publish' : 'draft',
+                        'post_content'   => $type->policy,
+                        'comment_status' => 'closed',
+                        'ping_status'    => 'closed'
+                    ));
+
+                    if (!is_wp_error($post_id) && isset($type->category)) {
+                        // Adding newly added post to event type category
+                        $term = wp_create_term(
+                            $type->category,
+                            EventTypeManager::EVENT_TYPE_CATEGORY
+                        );
+
+                        if (!is_wp_error($term)) {
+                            wp_set_post_terms(
+                                $post_id,
+                                $term['term_id'],
+                                EventTypeManager::EVENT_TYPE_CATEGORY,
+                                true
+                            );
+                        }
+
+                        // Also insert GUID
+                        add_post_meta($post_id, 'guid', $type->guid, true);
+                    }
+                }
+            }
         }
     }
 
@@ -319,5 +359,4 @@ class Manager
 
         return self::$_instance;
     }
-
 }

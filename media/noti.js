@@ -297,53 +297,53 @@
 
                 const actions = $('<div/>', { class: 'row-actions visible' });
 
-                if (data[4] !== 'trash') {
-                    if (data[5]['edit']) {
-                        actions.append('<span class="0"><a href="' + data[5]['edit'] + '">Edit</a> | </span>');
+                if (data[3] !== 'trash') {
+                    if (data[4]['edit']) {
+                        actions.append('<span class="0"><a href="' + data[4]['edit'] + '">Edit</a> | </span>');
                     } else {
-                        actions.append('<span class="0"><a href="#" disabled>Edit</a> | </span>');
+                        actions.append('<span class="0">Edit | </span>');
                     }
 
-                    if (data[5]['duplicate']) {
-                        actions.append('<span class="0"><a href="' + data[5]['duplicate'] + '">Duplicate</a> | </span>');
+                    if (data[4]['duplicate']) {
+                        actions.append('<span class="0"><a href="' + data[4]['duplicate'] + '">Duplicate</a> | </span>');
                     } else {
-                        actions.append('<span class="0"><a href="#" disabled>Duplicate</a> | </span>');
+                        actions.append('<span class="0">Duplicate | </span>');
                     }
                 }
 
-                if (data[4] === 'publish') {
-                    if (data[5]['deactivate']) {
-                        actions.append('<span class="0"><a href="' + data[5]['deactivate'] + '">Deactivate</a> | </span>');
+                if (data[3] === 'publish') {
+                    if (data[4]['deactivate']) {
+                        actions.append('<span class="0"><a href="' + data[4]['deactivate'] + '">Deactivate</a> | </span>');
                     } else {
-                        actions.append('<span class="0"><a href="#" disabled>Deactivate</a> | </span>');
+                        actions.append('<span class="0">Deactivate | </span>');
                     }
-                } else if (data[4] === 'draft') {
-                    if (data[5]['activate']) {
-                        actions.append('<span class="0"><a href="' + data[5]['activate'] + '">Activate</a> | </span>');
+                } else if (data[3] === 'draft') {
+                    if (data[4]['activate']) {
+                        actions.append('<span class="0"><a href="' + data[4]['activate'] + '">Activate</a> | </span>');
                     } else {
-                        actions.append('<span class="0"><a href="#" disabled>Activate</a> | </span>');
+                        actions.append('<span class="0">Activate | </span>');
                     }
                 }
 
-                if (data[5]['subscribe']) {
-                    actions.append('<span class="0"><a href="' + data[5]['subscribe'] + '">Subscribe</a> | </span>');
+                if (data[4]['subscribe']) {
+                    actions.append('<span class="0"><a href="' + data[4]['subscribe'] + '">Subscribe</a> | </span>');
                 } else {
-                    actions.append('<span class="0"><a href="' + data[5]['unsubscribe'] + '">Unsubscribe</a> | </span>');
+                    actions.append('<span class="0"><a href="' + data[4]['unsubscribe'] + '">Unsubscribe</a> | </span>');
                 }
 
-                if (data[4] === 'trash') {
-                    if (data[5]['restore']) {
-                        actions.append('<span class="0"><a href="' + data[5]['restore'] + '">Restore</a> | </span>');
-                        actions.append('<span class="delete"><a href="' + data[5]['delete'] + '" class="delete">Delete Permanently</a></span>');
+                if (data[3] === 'trash') {
+                    if (data[4]['restore']) {
+                        actions.append('<span class="0"><a href="' + data[4]['restore'] + '">Restore</a> | </span>');
+                        actions.append('<span class="delete"><a href="' + data[4]['delete'] + '" class="delete">Delete Permanently</a></span>');
                     } else {
                         actions.append('<span class="0"><a href="#" disabled>Restore</a> | </span>');
-                        actions.append('<span class="0"><a href="#" disabled>Delete Permanently</a></span>');
+                        actions.append('<span class="0">Delete Permanently</span>');
                     }
                 } else {
-                    if (data[5]['trash']) {
-                        actions.append('<span class="delete"><a href="' + data[5]['trash'] + '" class="delete">Trash</a></span>');
+                    if (data[4]['trash']) {
+                        actions.append('<span class="delete"><a href="' + data[4]['trash'] + '" class="delete">Trash</a></span>');
                     } else {
-                        actions.append('<span class="delete"><a href="#" class="delete" disabled>Trash</a></span>');
+                        actions.append('<span class="delete">Trash</span>');
                     }
                 }
 
@@ -353,7 +353,7 @@
                 $('td:eq(2)', row).html($('<p/>').html(data[2]));
                 $('td:eq(2)', row).append($('<div/>', {
                     class: 'second'
-                }).html('Minimum Required Version: <strong>' + data[6] + '</strong>'));
+                }).html('Minimum Required Version: <strong>' + data[5] + '</strong>'));
             }
         });
 

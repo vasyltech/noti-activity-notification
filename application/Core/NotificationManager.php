@@ -31,11 +31,13 @@ class NotificationManager
             $type = $factory->getEventTypeById($event['post_id']);
 
             if ($type) {
-                $notifications = self::getActiveNotificationTypes(
-                    $type->policy->Notification
-                );
+                if (property_exists($type->policy, 'Notifications')) {
+                    $notifications = self::getActiveNotificationTypes(
+                        $type->policy->Notifications
+                    );
+                }
 
-                if (count($notifications)) { // Ok, do we even need to send anything?
+                if (!empty($notifications)) { // Ok, do we even need to send anything?
                     self::preparePackages(
                         $packages, $notifications, $event, $type
                     );
@@ -115,19 +117,19 @@ class NotificationManager
             foreach($notifications as $notification) {
                 $final = clone $notification;
 
-                if ($final->Status === 'active') {
-                    // Let's find the same notification type in global settings &
-                    // merge them with event type specific settings
-                    foreach($global as $globalNotification) {
-                        if ($globalNotification->Type === $final->Type) {
-                            foreach($globalNotification as $key => $value) {
-                                if (!property_exists($final, $key)) {
-                                    $final->{$key} = $value;
-                                }
+                // Let's find the same notification type in global settings &
+                // merge them with event type specific settings
+                foreach($global as $globalNotification) {
+                    if ($globalNotification->Type === $final->Type) {
+                        foreach($globalNotification as $key => $value) {
+                            if (!property_exists($final, $key)) {
+                                $final->{$key} = $value;
                             }
                         }
                     }
+                }
 
+                if (!empty($final->Status) && $final->Status === 'active') {
                     array_push($response, $final);
                 }
             }
@@ -191,7 +193,7 @@ class NotificationManager
                 array_push(
                     $packages[$notification->Type]->Messages,
                     EventManager::prepareEventStringMessage(
-                        $event, null, $notification->MessageMarkdown
+                        $event, null, $notification->MessageMarkdown ?? null
                     )
                 );
             }
@@ -213,16 +215,20 @@ class NotificationManager
         if ($package->Type === 'email') {
             $result = wp_mail(
                 $package->Receivers,
-                $package->Subject ?? __('Noti: Website Activity Notifications'),
+                $package->Subject ?? __('WP Activity Notifications'),
                 implode('<br/>', $package->Messages),
                 array('Content-Type: text/html; charset=UTF-8')
             );
         } elseif ($package->Type === 'file') {
-            $dirname = dirname($package->Filepath);
+            $filepath = EventPolicyFactory::getInstance()->hydrateString(
+                $package->Filepath ?? ''
+            );
 
-            if ($dirname && is_writable($dirname)) {
+            $dirname = dirname($filepath);
+
+            if (is_dir($dirname) && is_writable($dirname)) {
                 $result = file_put_contents(
-                    $package->Filepath,
+                    $filepath,
                     implode(PHP_EOL, $package->Messages),
                     FILE_APPEND
                 );
@@ -262,9 +268,9 @@ class NotificationManager
             $json = OptionManager::getOption('noti-notifications', '[]');
 
             if (is_string($json)) {
-                $manager = EventPolicyFactory::getInstance()->hydrate($json);
+                $decoded = json_decode($json);
 
-                self::$_globalPolicy = $manager->getPolicyTree();
+                self::$_globalPolicy = is_array($decoded) ? $decoded : [];
             } else {
                 self::$_globalPolicy = [];
             }

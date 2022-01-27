@@ -43,6 +43,17 @@ class Context
     }
 
     /**
+     * Undocumented function
+     *
+     * @param [type] $prop
+     * @return boolean
+     */
+    public function __isset($prop)
+    {
+        return property_exists($this, $prop);
+    }
+
+    /**
      * Get marker value
      *
      * @param string $source

@@ -21,7 +21,7 @@ class OptionManager
 
             // If null, then get it from the main site as fallback
             if (is_null($result)) {
-                $result = get_blog_option(self::getMainSiteId(), $option, null);
+                $result = get_blog_option(Helper::getMainSiteId(), $option, null);
             }
         } else {
             $result = get_option($option, null);
@@ -46,25 +46,6 @@ class OptionManager
         }
 
         return $result;
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @return void
-     */
-    protected static function getMainSiteId()
-    {
-        if (function_exists('get_main_site_id')) {
-            $id = get_main_site_id();
-        } elseif (is_multisite()) {
-            $network = get_network();
-            $id      = ($network ? $network->site_id : 0);
-        } else {
-            $id = get_current_blog_id();
-        }
-
-        return $id;
     }
 
 }

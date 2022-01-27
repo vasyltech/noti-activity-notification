@@ -61,9 +61,11 @@ class EventPolicyFactory
      */
     public function getEventTypeById($id)
     {
-        return array_pop(array_filter($this->_eventTypes, function($type) use ($id) {
+        $filtered = array_filter($this->_eventTypes, function($type) use ($id) {
             return $type->post->ID === intval($id);
-        }));
+        });
+
+        return array_pop($filtered);
     }
 
     /**
@@ -106,10 +108,7 @@ class EventPolicyFactory
     {
         $this->_eventTypes = [];
 
-        if (is_multisite()) {
-            // All event types are global and live in the main site
-            switch_to_blog($this->getMainSiteId());
-        }
+        Helper::switchToMainSite();
 
         $types = get_posts(array(
             'post_type'   => 'noti_event_type',
@@ -117,9 +116,7 @@ class EventPolicyFactory
             'post_status' => array('publish', 'draft'),
         ));
 
-        if (is_multisite()) {
-            restore_current_blog();
-        }
+        Helper::restoreCurrentSite();
 
         foreach($types as $type) {
             $event = $this->prepareEventType($type);
@@ -222,25 +219,6 @@ class EventPolicyFactory
     /**
      * Undocumented function
      *
-     * @return void
-     */
-    protected function getMainSiteId()
-    {
-        if (function_exists('get_main_site_id')) {
-            $id = get_main_site_id();
-        } elseif (is_multisite()) {
-            $network = get_network();
-            $id      = ($network ? $network->site_id : 0);
-        } else {
-            $id = get_current_blog_id();
-        }
-
-        return $id;
-    }
-
-    /**
-     * Undocumented function
-     *
      * @return EventPolicyFactory
      */
     public static function getInstance()
@@ -301,7 +279,8 @@ class EventPolicyFactory
      *
      * @param string $str
      * @param array $context
-     * @return void
+     *
+     * @return string
      */
     public function hydrateString(string $str, array $context = [])
     {

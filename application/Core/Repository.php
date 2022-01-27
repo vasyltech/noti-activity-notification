@@ -39,7 +39,7 @@ class Repository
     {
         global $wpdb;
 
-        $table = $wpdb->prefix . 'noti_events';
+        $table = self::getTablePrefix() . 'noti_events';
 
         $q  = "INSERT INTO {$table} (`site_id`, `post_id`, `first_occurrence_at`, ";
         $q .= '`sealed_at`, `hash`) VALUES (%d, %d, %s, %s, %s) ON DUPLICATE KEY ';
@@ -52,7 +52,6 @@ class Repository
             $event['created_at'],
             $event['sealed_at'],
             $event['hash'],
-            $event['created_at'],
             $event['created_at']
         ));
 
@@ -61,7 +60,7 @@ class Repository
 
         // Also try to insert all the metadata (aka "event attributes")
         if ($last_id !== 0) {
-            $table = $wpdb->prefix . 'noti_eventmeta';
+            $table = self::getTablePrefix() . 'noti_eventmeta';
 
             foreach ($metadata as $key => $value) {
                 $q  = "INSERT INTO {$table} (`event_id`, `meta_key`, `meta_value`) ";
@@ -85,8 +84,10 @@ class Repository
     {
         global $wpdb;
 
-        $query  = "SELECT COUNT(DISTINCT(e.id)) FROM {$wpdb->prefix}noti_events AS e ";
-        $query .= "LEFT JOIN {$wpdb->prefix}noti_eventmeta AS m ON (e.id = m.event_id)";
+        $prefix = self::getTablePrefix();
+
+        $query  = "SELECT COUNT(DISTINCT(e.id)) FROM {$prefix}noti_events AS e ";
+        $query .= "LEFT JOIN {$prefix}noti_eventmeta AS m ON (e.id = m.event_id)";
 
         return intval($wpdb->get_var(
             self::appendEventWhereClause($query, $filters)
@@ -106,7 +107,7 @@ class Repository
     {
         global $wpdb;
 
-        $prefix = $wpdb->prefix;
+        $prefix = self::getTablePrefix();
 
         $query  = 'SELECT DISTINCT(e.id), e.post_id, ';
         $query .= "IFNULL(e.last_occurrence_at, e.first_occurrence_at) AS `time`, ";
@@ -118,7 +119,11 @@ class Repository
         // Add order by and length
         $sql .= ' ORDER BY `time` DESC LIMIT %d,%d';
 
-        return $wpdb->get_results($wpdb->prepare($sql, $offset, $length), ARRAY_A);
+        $results = $wpdb->get_results(
+            $wpdb->prepare($sql, $offset, $length), ARRAY_A
+        );
+
+        return is_array($results) ? $results : array();
     }
 
     /**
@@ -130,7 +135,7 @@ class Repository
     {
         global $wpdb;
 
-        $prefix = $wpdb->prefix;
+        $prefix = self::getTablePrefix();
 
         $query  = 'SELECT DISTINCT(e.post_id), p.post_title ';
         $query .= "FROM {$prefix}noti_events AS e ";
@@ -141,9 +146,12 @@ class Repository
         $sql = $wpdb->prepare($query, self::STATUS_DELETED);
 
         $response = array();
+        $results  = $wpdb->get_results($sql, ARRAY_A);
 
-        foreach ($wpdb->get_results($sql, ARRAY_A) as $row) {
-            $response[$row['post_title']] = $row['post_id'];
+        if (is_array($results)) {
+            foreach ($results as $row) {
+                $response[$row['post_title']] = $row['post_id'];
+            }
         }
 
         return $response;
@@ -158,7 +166,7 @@ class Repository
     {
         global $wpdb;
 
-        $prefix = $wpdb->prefix;
+        $prefix = self::getTablePrefix();
 
         $query  = 'SELECT m.meta_value, COUNT(e.id) AS total ';
         $query .= "FROM {$prefix}noti_events AS e ";
@@ -169,9 +177,12 @@ class Repository
         $sql = $wpdb->prepare($query, self::STATUS_DELETED, 'level');
 
         $response = array();
+        $results  = $wpdb->get_results($sql, ARRAY_A);
 
-        foreach ($wpdb->get_results($sql, ARRAY_A) as $row) {
-            $response[$row['meta_value']] = $row['total'];
+        if (is_array($results)) {
+            foreach ($results as $row) {
+                $response[$row['meta_value']] = $row['total'];
+            }
         }
 
         return $response;
@@ -187,7 +198,8 @@ class Repository
     {
         global $wpdb;
 
-        $prefix  = $wpdb->prefix;
+        $prefix = self::getTablePrefix();
+
         $results = $wpdb->get_results(
             $wpdb->prepare(
                 "SELECT * FROM {$prefix}noti_eventmeta WHERE event_id = %d",
@@ -198,8 +210,10 @@ class Repository
 
         $response = [];
 
-        foreach ($results as $row) {
-            $response[$row['meta_key']] = maybe_unserialize($row['meta_value']);
+        if (is_array($results)) {
+            foreach ($results as $row) {
+                $response[$row['meta_key']] = maybe_unserialize($row['meta_value']);
+            }
         }
 
         return $response;
@@ -216,7 +230,7 @@ class Repository
     {
         global $wpdb;
 
-        $table = $wpdb->prefix . 'noti_events';
+        $table = self::getTablePrefix() . 'noti_events';
 
         $q  = "UPDATE {$table} SET `status` = `status` | %d WHERE ";
         $q .= 'DATEDIFF(NOW(), IFNULL(last_occurrence_at, first_occurrence_at)) > %d';
@@ -236,7 +250,9 @@ class Repository
     {
         global $wpdb;
 
-        $q  = "SELECT id FROM {$wpdb->prefix}noti_events WHERE ";
+        $prefix = self::getTablePrefix();
+
+        $q  = "SELECT id FROM {$prefix}noti_events WHERE ";
         $q .= 'DATEDIFF(NOW(), IFNULL(last_occurrence_at, first_occurrence_at)) > %d ';
         $q .= 'LIMIT %d';
 
@@ -255,7 +271,7 @@ class Repository
     {
         global $wpdb;
 
-        $table = $wpdb->prefix . 'noti_events';
+        $table = self::getTablePrefix() . 'noti_events';
 
         $q  = "UPDATE {$table} SET `status` = `status` | %d WHERE id IN (";
         $q .= implode(',', array_fill(0, count($eventIds), '%d')) . ')';
@@ -274,7 +290,7 @@ class Repository
     {
         global $wpdb;
 
-        $table = $wpdb->prefix . 'noti_events';
+        $table = self::getTablePrefix() . 'noti_events';
 
         $q  = "DELETE FROM {$table} WHERE id IN (";
         $q .= implode(',', array_fill(0, count($eventIds), '%d')) . ')';
@@ -293,7 +309,7 @@ class Repository
     {
         global $wpdb;
 
-        $table = $wpdb->prefix . 'noti_eventmeta';
+        $table = self::getTablePrefix() . 'noti_eventmeta';
 
         $q  = "DELETE FROM {$table} WHERE event_id IN (";
         $q .= implode(',', array_fill(0, count($eventIds), '%d')) . ')';
@@ -312,7 +328,7 @@ class Repository
     {
         global $wpdb;
 
-        $table = $wpdb->prefix . 'noti_eventmeta';
+        $table = self::getTablePrefix() . 'noti_eventmeta';
 
         $q  = "INSERT INTO {$table} (`event_id`, `meta_key`, `meta_value`)";
         $q .= 'VALUES ' . implode(',', array_fill(0, count($ids), '(%d,%s,%d)'));
@@ -338,22 +354,24 @@ class Repository
     {
         global $wpdb;
 
-        $table = $wpdb->prefix . 'noti_events';
-        $now   = date('Y-m-d H:i:s');
+        $prefix = self::getTablePrefix();
+        $now    = date('Y-m-d H:i:s');
 
-        $query  = "SELECT e.*, m.meta_value AS `attempt` FROM {$table} AS e ";
-        $query .= "LEFT JOIN {$wpdb->prefix}noti_eventmeta AS m ON ";
+        $query  = "SELECT e.*, m.meta_value AS `attempt` FROM {$prefix}noti_events AS e ";
+        $query .= "LEFT JOIN {$prefix}noti_eventmeta AS m ON ";
         $query .= "(e.id = m.event_id AND m.`meta_key` = %s) WHERE ";
         $query .= "(e.`sealed_at` < %s) && (e.`status` & %d = 0) ORDER BY ";
         $query .= "e.`sealed_at` ASC LIMIT %d";
 
-        return $wpdb->get_results($wpdb->prepare(
+        $result = $wpdb->get_results($wpdb->prepare(
             $query,
             '__attempt',
             $now,
             self::STATUS_NOTIFIED | self::STATUS_DISCHARGED | self::STATUS_DELETED,
             $limit
         ), ARRAY_A);
+
+        return is_array($result) ? $result : array();
     }
 
     /**
@@ -366,7 +384,7 @@ class Repository
     public static function updateSubscription(array $subscription) {
         global $wpdb;
 
-        $table = $wpdb->prefix . 'noti_subscribers';
+        $table = self::getTablePrefix() . 'noti_subscribers';
 
         $q  = "INSERT INTO {$table} (`site_id`, `post_id`, `user_id`, ";
         $q .= '`is_subscribed`) VALUES (%d, %d, %d, %d) ON DUPLICATE KEY ';
@@ -392,7 +410,7 @@ class Repository
     {
         global $wpdb;
 
-        $prefix = $wpdb->prefix;
+        $prefix = self::getTablePrefix();
 
         $query  = "SELECT user_id FROM {$prefix}noti_subscribers ";
         $query .= 'WHERE post_id = %d AND (site_id IN (%d, -1))';
@@ -413,7 +431,7 @@ class Repository
     {
         global $wpdb;
 
-        $prefix = $wpdb->prefix;
+        $prefix = self::getTablePrefix();
 
         $query  = "SELECT is_subscribed FROM {$prefix}noti_subscribers ";
         $query .= 'WHERE site_id = %d AND post_id = %d AND user_id = %d';
@@ -421,6 +439,39 @@ class Repository
         return intval($wpdb->get_var(
             $wpdb->prepare($query, $site_id, $post_id, $user_id
         )));
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param [type] $site_id
+     * @param [type] $post_id
+     * @param [type] $user_id
+     *
+     * @return object
+     */
+    public static function getPostTypeByGuid($guid)
+    {
+        global $wpdb;
+
+        $prefix = self::getTablePrefix();
+
+        $query  = "SELECT * FROM {$prefix}posts ";
+        $query .= 'WHERE guid = %s';
+
+        return $wpdb->get_row($wpdb->prepare($query, $guid));
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    protected static function getTablePrefix()
+    {
+        global $wpdb;
+
+        return $wpdb->get_blog_prefix(Helper::getMainSiteId());
     }
 
     /**
