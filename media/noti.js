@@ -3,7 +3,17 @@
     /**
      * Collection of inputs user is still typing in
      */
-    const StillTyping = {}
+    const StillTyping = {};
+
+    /**
+     *
+     */
+    const BASE_GITHUB_URL = 'https://raw.githubusercontent.com/vasyltech/noti-event-types/main/';
+
+    /**
+     *
+     */
+    const EventTypeRegistry = [];
 
     /**
      * Check if user is still typing
@@ -103,7 +113,7 @@
 
                 const dateSelect = $('<select/>', {
                     id: 'date-selector'
-                }).bind('change', function() {
+                }).bind('change', function () {
                     table.ajax.reload();
                 });
 
@@ -124,7 +134,7 @@
 
                 const eventSelect = $($('#event-type-container').html());
 
-                $(eventSelect).bind('change', function() {
+                $(eventSelect).bind('change', function () {
                     table.ajax.reload();
                 });
 
@@ -157,7 +167,7 @@
             SetDelayedCallback($(this), () => table.ajax.reload());
         });
 
-        $('.subsubsub a').each(function() {
+        $('.subsubsub a').each(function () {
             $(this).bind('click', (e) => {
                 e.preventDefault();
 
@@ -239,12 +249,12 @@
                     type: 'button',
                     class: 'button action',
                     value: 'Apply'
-                }).bind('click', function() {
+                }).bind('click', function () {
                     const action = $('#bulk-action-selector').val();
-                    const ids    = [];
+                    const ids = [];
 
                     // Get all the selected items
-                    $('.event-id:checked').each(function() {
+                    $('.event-id:checked').each(function () {
                         ids.push($(this).val());
                     });
 
@@ -281,7 +291,7 @@
 
                 const cats = $($('#category-list').html());
 
-                $(cats).bind('change', function() {
+                $(cats).bind('change', function () {
                     table.ajax.reload();
                 });
 
@@ -350,10 +360,11 @@
                 $('td:eq(1)', row).append(actions);
 
                 // Building the description
-                $('td:eq(2)', row).html($('<p/>').html(data[2]));
+                $('td:eq(2)', row).html($('<span/>').html(data[2]));
                 $('td:eq(2)', row).append($('<div/>', {
-                    class: 'second'
-                }).html('Minimum Required Version: <strong>' + data[5] + '</strong>'));
+                    class: 'second',
+                    style: 'margin-top: 5px;'
+                }).html('Required Version: <strong>' + data[5] + '</strong>'));
             }
         });
 
@@ -370,7 +381,7 @@
             SetDelayedCallback($(this), () => table.ajax.reload());
         });
 
-        $('.subsubsub a').each(function() {
+        $('.subsubsub a').each(function () {
             $(this).bind('click', (e) => {
                 e.preventDefault();
 
@@ -384,27 +395,105 @@
         });
     }
 
+    /**
+     *
+     */
     const InitializeWelcomeScreen = () => {
-        $('#setup').bind('click', function() {
-            $(this).attr('disabled', true);
-            $(this).val('Configuring Plugin. Please wait...');
-
-            $.ajax(GetLocal('apiEntpoint') + '/setup', {
+        /**
+     *
+     */
+        function InstallEventTypes() {
+            $.ajax(GetLocal('apiEntpoint') + '/event-types', {
                 type: 'POST',
                 dataType: 'json',
+                data: JSON.stringify(EventTypeRegistry),
+                beforeSend: function () {
+                    $('#setup').val('Installing events...');
+                },
                 headers: {
                     'X-WP-Nonce': GetLocal('apiNonce')
                 },
-                success: function (response) {
-                    //
+                success: function () {
                 },
                 error: function () {
                     //
                 },
                 complete: function () {
-                    console.log('done');
+                    location.reload();
                 }
             });
+        }
+
+        /**
+         *
+         */
+        function DownloadEventTypes() {
+            let counter = EventTypeRegistry.length;
+
+            for (const type of EventTypeRegistry) {
+                $.ajax(`${BASE_GITHUB_URL}/event-types/${type.guid}.json`, {
+                    type: 'GET',
+                    dataType: 'json',
+                    async: false,
+                    beforeSend: function () {
+                        $('#setup').val(`Downloading ${counter} Events...`);
+                    },
+                    success: function (response) {
+                        type.policy = response;
+                    },
+                    error: function (response) {
+                    },
+                    complete: function () {
+                        counter--;
+                    }
+                });
+            }
+
+            InstallEventTypes();
+        }
+
+        /**
+         *
+         */
+        function SetupDatabase() {
+            $('#setup').val('Configuring Database...');
+
+            $.ajax(GetLocal('apiEntpoint') + '/setup', {
+                type: 'POST',
+                headers: {
+                    'X-WP-Nonce': GetLocal('apiNonce')
+                },
+                success: function () {
+                    console.log('here');
+                    if ($('#install-event-types').is(':checked')) {
+                        DownloadEventTypes();
+                    } else {
+                        location.reload();
+                    }
+                },
+                error: function () {
+                    //
+                }
+            });
+        }
+
+        // Loading the official event type registry
+        $.ajax(`${BASE_GITHUB_URL}/registry.json`, {
+            type: 'GET',
+            dataType: 'json',
+            success: function (response) {
+                EventTypeRegistry.push(...response);
+                $('#event-types-count').text(response.length);
+            },
+            error: function (response) {
+            }
+        });
+
+        $('#setup').bind('click', function () {
+            $(this).attr('disabled', true);
+            $(this).val('Configuring Plugin. Please wait...');
+
+            SetupDatabase();
         });
     }
 

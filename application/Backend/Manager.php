@@ -2,6 +2,8 @@
 
 namespace Noti\Backend;
 
+use Noti\Core\OptionManager;
+
 class Manager
 {
 
@@ -18,48 +20,52 @@ class Manager
         add_action('admin_menu', function () {
             global $submenu;
 
-            // add_menu_page(
-            //     __('Events', NOTI_KEY),
-            //     __('Events', NOTI_KEY),
-            //     'administrator',
-            //     'noti',
-            //     array($this, 'renderWelcomePage')
-            // );
+            $need_welcome = OptionManager::getOption('noti-welcome', true);
 
-            add_menu_page(
-                __('Events', NOTI_KEY),
-                __('Events', NOTI_KEY),
-                'administrator',
-                'noti',
-                array($this, 'renderLogPage')
-            );
-
-            add_submenu_page(
-                'noti',
-                __('Event Types', NOTI_KEY),
-                __('Event Types', NOTI_KEY),
-                'administrator',
-                'noti-types',
-                array($this, 'renderEventTypesPage')
-            );
-
-            array_push(
-                $submenu['noti'],
-                array(
-                    __( 'Categories' ),
+            if ($need_welcome) {
+                add_menu_page(
+                    __('Events', NOTI_KEY),
+                    __('Events', NOTI_KEY),
                     'administrator',
-                    'edit-tags.php?taxonomy=noti_event_type_cat'
-                )
-            );
+                    'noti',
+                    array($this, 'renderWelcomePage')
+                );
+            } else {
+                add_menu_page(
+                    __('Events', NOTI_KEY),
+                    __('Events', NOTI_KEY),
+                    'administrator',
+                    'noti',
+                    array($this, 'renderLogPage')
+                );
 
-            add_submenu_page(
-                'noti',
-                __('Settings', NOTI_KEY),
-                __('Settings', NOTI_KEY),
-                'administrator',
-                'noti-settings',
-                array($this, 'renderSettingsPage')
-            );
+                add_submenu_page(
+                    'noti',
+                    __('Event Types', NOTI_KEY),
+                    __('Event Types', NOTI_KEY),
+                    'administrator',
+                    'noti-types',
+                    array($this, 'renderEventTypesPage')
+                );
+
+                array_push(
+                    $submenu['noti'],
+                    array(
+                        __( 'Categories' ),
+                        'administrator',
+                        'edit-tags.php?taxonomy=noti_event_type_cat'
+                    )
+                );
+
+                add_submenu_page(
+                    'noti',
+                    __('Settings', NOTI_KEY),
+                    __('Settings', NOTI_KEY),
+                    'administrator',
+                    'noti-settings',
+                    array($this, 'renderSettingsPage')
+                );
+            }
         });
 
         add_filter('parent_file', function($parent_file) {

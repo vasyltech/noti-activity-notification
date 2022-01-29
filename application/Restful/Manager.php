@@ -5,6 +5,7 @@ namespace Noti\Restful;
 use WP_REST_Request,
     Noti\Core\Repository,
     Noti\Core\EventManager,
+    Noti\Core\OptionManager,
     Noti\Core\EventTypeManager;
 
 /**
@@ -53,6 +54,14 @@ class Manager
             register_rest_route('noti/v1', '/setup', array(
                 'methods' => 'POST',
                 'callback' => array($this, 'setup'),
+                'permission_callback' => function () {
+                    return current_user_can('administrator');
+                }
+            ));
+
+            register_rest_route('noti/v1', '/event-types', array(
+                'methods' => 'POST',
+                'callback' => array($this, 'installPostTypes'),
                 'permission_callback' => function () {
                     return current_user_can('administrator');
                 }
@@ -262,33 +271,53 @@ class Manager
 
             dbDelta($sql);
 
-            // The next step is to insert all the event types & categories
-            $types = json_decode(file_get_contents(
-                NOTI_BASEDIR . '/setup/event-types.json'
-            ));
+            OptionManager::updateOption('noti-welcome', 0, true);
+        }
 
-            foreach ($types as $type) {
-                $existing = Repository::getPostTypeByGuid($type->guid);
+        return true;
+    }
 
-                if (empty($existing->ID)) {
-                    $post_id = wp_insert_post(array(
-                        'post_type'      => EventTypeManager::EVENT_TYPE,
-                        'post_title'     => $type->title,
-                        'post_excerpt'   => $type->excerpt,
-                        'post_status'    => $type->status === 'active' ? 'publish' : 'draft',
-                        'post_content'   => $type->policy,
-                        'comment_status' => 'closed',
-                        'ping_status'    => 'closed'
-                    ));
+    /**
+     * Undocumented function
+     *
+     * @param WP_REST_Request $request
+     * @return void
+     */
+    public function installPostTypes(WP_REST_Request $request)
+    {
+        $types = json_decode($request->get_body());
 
-                    if (!is_wp_error($post_id) && isset($type->category)) {
+        foreach ($types as $type) {
+            $existing = Repository::getPostTypeByGuid($type->guid);
+
+            if (empty($existing->ID)) {
+                $post_id = wp_insert_post(array(
+                    'post_type'      => EventTypeManager::EVENT_TYPE,
+                    'post_title'     => $type->title,
+                    'post_excerpt'   => $type->excerpt,
+                    'post_status'    => $type->status === 'active' ? 'publish' : 'draft',
+                    'post_content'   => json_encode($type->policy),
+                    'comment_status' => 'closed',
+                    'ping_status'    => 'closed'
+                ));
+
+                if (!is_wp_error($post_id)) {
+                    if (isset($type->category)) {
                         // Adding newly added post to event type category
-                        $term = wp_create_term(
+                        $term_id = term_exists(
                             $type->category,
                             EventTypeManager::EVENT_TYPE_CATEGORY
                         );
 
-                        if (!is_wp_error($term)) {
+                        if (!$term_id) {
+                            $term = wp_insert_term(
+                                $type->category,
+                                EventTypeManager::EVENT_TYPE_CATEGORY
+                            );
+                            $term_id = !is_wp_error($term) ? $term['term_id'] : null;
+                        }
+
+                        if ($term_id) {
                             wp_set_post_terms(
                                 $post_id,
                                 $term['term_id'],
@@ -296,13 +325,15 @@ class Manager
                                 true
                             );
                         }
-
-                        // Also insert GUID
-                        add_post_meta($post_id, 'guid', $type->guid, true);
                     }
+
+                    // Also insert GUID
+                    add_post_meta($post_id, 'guid', $type->guid, true);
                 }
             }
         }
+
+        return true;
     }
 
     /**
@@ -359,4 +390,5 @@ class Manager
 
         return self::$_instance;
     }
+
 }

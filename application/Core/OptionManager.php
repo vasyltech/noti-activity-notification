@@ -37,10 +37,14 @@ class OptionManager
      * @param [type] $data
      * @return void
      */
-    public static function updateOption($option, $data)
+    public static function updateOption($option, $data, $update_main = false)
     {
         if (is_multisite()) {
-            $result = update_blog_option(get_current_blog_id(), $option, $data);
+            if ($update_main) {
+                $result = update_blog_option(Helper::getMainSiteId(), $option, $data);
+            } else {
+                $result = update_blog_option(get_current_blog_id(), $option, $data);
+            }
         } else {
             $result = update_option($option, $data);
         }
