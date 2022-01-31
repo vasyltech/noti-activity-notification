@@ -167,6 +167,8 @@ class Manager
                     'hash'      => $hash
                 ), $this->prepareEventMetadata($manager));
             }
+
+            return array_pop($args);
         };
 
         // Now register the hook
@@ -190,6 +192,8 @@ class Manager
                 if ($manager->isApplicable()) {
                     ListenerManager::addToScope($scope, $i, $manager->Metadata);
                 }
+
+                return array_pop($args);
             };
 
             $this->registerHook($listener->type, $listener->hook, $listener_cb);

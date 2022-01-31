@@ -255,6 +255,7 @@ class EventPolicyFactory
             'context'        => $context,
             'custom_markers' => array(
                 'FUNC'              => __CLASS__ . '::getCallbackReturn',
+                'ARRAY_MAP'         => __CLASS__ . '::getArrayMapReturn',
                 'CONST'             => __CLASS__ . '::getConstant',
                 'USER'              => __CLASS__ . '::getUserValue',
                 'USER_OPTION'       => __CLASS__ . '::getUserOptionValue',
@@ -324,6 +325,45 @@ class EventPolicyFactory
         }
 
         return $value;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param [type] $func_exp
+     * @param Context $context
+     *
+     * @return void
+     */
+    public static function getArrayMapReturn($func_exp, Context $context)
+    {
+        $values = array();
+        $cb    = self::_parseFunction($func_exp, $context);
+
+        // Array map can works ONLY if the first argument is an array. Otherwise,
+        // what's a point to do the rest?
+        if (!is_null($cb) && isset($cb['args'][0]) && is_array($cb['args'][0])) {
+            foreach($cb['args'][0] as $element) {
+                $func = apply_filters(
+                    'noti_func_source', $cb['func'], [$element], $context
+                );
+
+                if (is_callable($func) || function_exists($func)) {
+                    $result = call_user_func($func, $element);
+
+                    if (!empty($cb['xpath'])) {
+                        array_push(
+                            $values,
+                            MarkerManager::getValueByXPath($result, $cb['xpath'])
+                        );
+                    } else {
+                        array_push($values, $result);
+                    }
+                }
+            }
+        }
+
+        return $values;
     }
 
     /**
@@ -601,7 +641,7 @@ class EventPolicyFactory
     private static function _parseFunction($func_exp, Context $context)
     {
         $response = null;
-        $regex    = '/^([a-z_\x80-\xff][a-z\d_\x80-\xff]*)\(([^)]*)\)(.*)$/i';
+        $regex    = '/^([a-z_\x80-\xff][a-z\d_\x80-\xff]*)\((.*)\)(.*)$/i';
 
         if (preg_match($regex, $func_exp, $match)) {
             // The second part is the collection of arguments that we pass to
@@ -612,10 +652,14 @@ class EventPolicyFactory
             foreach($markers as $marker) {
                 $parts = explode('.', $marker, 2);
 
-                array_push(
-                    $args,
-                    $context->getMarkerValue($parts[0], $parts[1] ?? null)
-                );
+                if (count($parts) > 1) {
+                    array_push(
+                        $args,
+                        $context->getMarkerValue($parts[0], $parts[1] ?? null)
+                    );
+                } else {
+                    array_push($args, $parts[0]);
+                }
             }
 
             $response = array(

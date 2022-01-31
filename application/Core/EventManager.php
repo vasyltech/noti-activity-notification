@@ -56,7 +56,7 @@ class EventManager
                 )
             ));
         } else {
-            $response  = 'Cannot for sure determine the type of event.';
+            $response  = 'Cannot for sure determine the type of event. ';
             $response .= 'Probably the event type was deleted';
         }
 

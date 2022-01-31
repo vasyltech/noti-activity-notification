@@ -62,6 +62,12 @@ use Noti\Core\OptionManager;
                         <textarea id="noti-notifications" name="noti-notifications" class="noti-notifications" rows="10"><?php echo esc_textarea($raw); ?></textarea>
                     </td>
                 </tr>
+                <tr>
+                    <th scope="row">Email Notifications Template</th>
+                    <td>
+                        <?php wp_editor( OptionManager::getOption('noti-email-notification-tmpl'), 'noti-email-notification-tmpl', $settings = array('textarea_name'=>'noti-email-notification-tmpl', 'media_buttons' => false, 'textarea_rows' => 10, 'tinymce' => false) ); ?>
+                    </td>
+                </tr>
             </tbody>
         </table>
 

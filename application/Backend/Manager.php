@@ -96,7 +96,8 @@ class Manager
                 'noti-settings' => array(
                     'noti-keep-logs',
                     'noti-cleanup-type',
-                    'noti-notifications'
+                    'noti-notifications',
+                    'noti-email-notification-tmpl'
                 )
             ));
         });

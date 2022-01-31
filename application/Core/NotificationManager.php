@@ -2,6 +2,8 @@
 
 namespace Noti\Core;
 
+use Noti\Vendor\TemplateEngine\Manager as TemplateEngineManager;
+
 class NotificationManager
 {
 
@@ -13,14 +15,19 @@ class NotificationManager
     private static $_globalPolicy = null;
 
     /**
+     * Undocumented variable
+     *
+     * @var array
+     */
+    private static $_cache = array();
+
+    /**
      * Undocumented function
      *
      * @return void
      */
     public static function trigger()
     {
-        $factory = EventPolicyFactory::getInstance();
-
         // Get the list of sealed events
         $events     = Repository::getPendingForNotificationEvents();
         $packages   = array();
@@ -28,22 +35,12 @@ class NotificationManager
 
         // Aggregating the notifications by type prior to sending them
         foreach($events as $event) {
-            $type = $factory->getEventTypeById($event['post_id']);
+            $notifications = self::getActiveNotificationTypesForEvent($event);
 
-            if ($type) {
-                if (property_exists($type->policy, 'Notifications')) {
-                    $notifications = self::getActiveNotificationTypes(
-                        $type->policy->Notifications
-                    );
-                }
-
-                if (!empty($notifications)) { // Ok, do we even need to send anything?
-                    self::preparePackages(
-                        $packages, $notifications, $event, $type
-                    );
-                } else { // No notifications? Discharge from attempts to send event
-                    array_push($discharged, $event['id']);
-                }
+            if (!empty($notifications)) { // Ok, do we even need to send anything?
+                self::preparePackages($packages, $notifications, $event);
+            } else { // No notifications? Discharge from attempts to send event
+                array_push($discharged, $event['id']);
             }
         }
 
@@ -102,11 +99,77 @@ class NotificationManager
     /**
      * Undocumented function
      *
+     * @param array $event
+     *
+     * @return array
+     */
+    protected static function getActiveNotificationTypesForEvent(array $event)
+    {
+        $factory = EventPolicyFactory::getInstance();
+        $typeId  = $event['post_id'];
+
+        if (!isset(self::$_cache[$typeId])) {
+            self::$_cache[$typeId] = array();
+
+            $type = $factory->getEventTypeById($typeId);
+
+            if ($type) {
+                $candidates = array();
+
+                // Check if event type has any notification types enabled and if
+                // so, get all of them. However, that does not mean that notification
+                // will be sent because it also may depend on type of type of
+                // notification and if it requires subscribers
+                if (property_exists($type->policy, 'Notifications')) {
+                    array_push(
+                        $candidates,
+                        ...self::hydrateActiveNotificationTypes(
+                            $type->policy->Notifications
+                        )
+                    );
+                }
+
+                // Now, if we have some notification types defined, let's also
+                // grab the list of subscribers for those that expect receivers
+                foreach($candidates as $candidate) {
+                    if ($candidate->Type === 'email') {
+                        $subscribers = $factory->getEventTypeSubscribers(
+                            $event['post_id'], $event['site_id']
+                        );
+
+                        if (count($subscribers)) {
+                            $candidate->Subscribers = array();
+
+                            foreach($subscribers as $subscriber) {
+                                $user = get_user_by('id', $subscriber);
+
+                                if (is_a($user, 'WP_User')) {
+                                    array_push(
+                                        $candidate->Subscribers, $user->user_email
+                                    );
+                                }
+                            }
+
+                            array_push(self::$_cache[$typeId], $candidate);
+                        }
+                    } else {
+                        array_push(self::$_cache[$typeId], $candidate);
+                    }
+                }
+            }
+        }
+
+        return self::$_cache[$typeId];
+    }
+
+    /**
+     * Undocumented function
+     *
      * @param [type] $notifications
      *
      * @return array
      */
-    protected static function getActiveNotificationTypes($notifications)
+    protected static function hydrateActiveNotificationTypes($notifications)
     {
         $response = array();
 
@@ -115,22 +178,27 @@ class NotificationManager
             $global = self::_getGlobalPolicy();
 
             foreach($notifications as $notification) {
-                $final = clone $notification;
+                $merged = clone $notification;
 
                 // Let's find the same notification type in global settings &
                 // merge them with event type specific settings
                 foreach($global as $globalNotification) {
-                    if ($globalNotification->Type === $final->Type) {
+                    if ($globalNotification->Type === $merged->Type) {
                         foreach($globalNotification as $key => $value) {
-                            if (!property_exists($final, $key)) {
-                                $final->{$key} = $value;
+                            if (!property_exists($merged, $key)) {
+                                $merged->{$key} = $value;
                             }
                         }
                     }
                 }
 
-                if (!empty($final->Status) && $final->Status === 'active') {
-                    array_push($response, $final);
+                // Hydrate the config
+                $hydrated = EventPolicyFactory::getInstance()->hydrate(
+                    json_encode($merged)
+                );
+
+                if (!empty($hydrated->Status) && $hydrated->Status === 'active') {
+                    array_push($response, $hydrated->getPolicyTree());
                 }
             }
         }
@@ -152,29 +220,11 @@ class NotificationManager
 
         foreach($notifications as $notification) {
             if (!isset($packages[$notification->Type])) {
-                $packages[$notification->Type] = $notification;
+                $packages[$notification->Type] = clone $notification;
 
                 // Also add container for the list of message
                 $packages[$notification->Type]->Messages = array();
                 $packages[$notification->Type]->Events = array();
-            }
-
-            if ($notification->Type === 'email') {
-                $subscribers = $factory->getEventTypeSubscribers(
-                    $event['post_id'], $event['site_id']
-                );
-                $packages[$notification->Type]->Receivers = array();
-
-                foreach($subscribers as $subscriber) {
-                    $user = get_user_by('id', $subscriber);
-
-                    if (is_a($user, 'WP_User')) {
-                        array_push(
-                            $packages[$notification->Type]->Receivers,
-                            $user->user_email
-                        );
-                    }
-                }
             }
 
             if ($notification->Type === 'webhook') {
@@ -213,11 +263,25 @@ class NotificationManager
         $result = false;
 
         if ($package->Type === 'email') {
+            if ($package->SendAsHTML === true) {
+                $body = TemplateEngineManager::getInstance()->render(
+                    str_replace(PHP_EOL, '<br/>', $package->BodyTemplate),
+                    array('messages' => $package->Messages)
+                );
+            } else {
+                $body = TemplateEngineManager::getInstance()->render(
+                    $package->BodyTemplate, array('messages' => $package->Messages)
+                );
+            }
+
             $result = wp_mail(
                 $package->Receivers,
                 $package->Subject ?? __('WP Activity Notifications'),
-                implode('<br/>', $package->Messages),
-                array('Content-Type: text/html; charset=UTF-8')
+                $body,
+                array_merge(
+                    is_array($package->Headers) ? $package->Headers : array(),
+                    array('Content-Type: text/html; charset=UTF-8')
+                )
             );
         } elseif ($package->Type === 'file') {
             $filepath = EventPolicyFactory::getInstance()->hydrateString(

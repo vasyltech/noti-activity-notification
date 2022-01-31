@@ -111,11 +111,13 @@ class EventTypeManager
             $post = get_post($id);
 
             if (is_a($post, 'WP_Post') && $post->post_type === self::EVENT_TYPE) {
+                $redirect = admin_url('admin.php?page=noti-types');
+
                 if (current_user_can('edit_posts')) {
                     $nonce = filter_input(INPUT_GET, '_wpnonce');
 
                     if (wp_verify_nonce($nonce, 'duplicate-post_' . $post->ID)) {
-                        wp_insert_post(array(
+                        $post_id = wp_insert_post(array(
                             'post_title'     => __('Duplicate ', NOTI_KEY) . $post->post_title,
                             'post_type'      => $post->post_type,
                             'post_content'   => $post->post_content,
@@ -124,10 +126,14 @@ class EventTypeManager
                             'comment_status' => 'closed',
                             'ping_status'    => 'closed'
                         ));
+
+                        if (!is_wp_error($post_id)) {
+                            $redirect = get_edit_post_link($post_id, 'jump');
+                        }
                     }
                 }
 
-                wp_redirect(admin_url('admin.php?page=noti-types'));
+                wp_redirect($redirect);
                 exit;
             }
         });

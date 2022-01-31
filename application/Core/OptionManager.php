@@ -21,7 +21,7 @@ class OptionManager
 
             // If null, then get it from the main site as fallback
             if (is_null($result)) {
-                $result = get_blog_option(Helper::getMainSiteId(), $option, null);
+                $result = get_site_option($option, $default);
             }
         } else {
             $result = get_option($option, null);
@@ -37,11 +37,12 @@ class OptionManager
      * @param [type] $data
      * @return void
      */
-    public static function updateOption($option, $data, $update_main = false)
+    public static function updateOption($option, $data, $update_globally = false)
     {
         if (is_multisite()) {
-            if ($update_main) {
-                $result = update_blog_option(Helper::getMainSiteId(), $option, $data);
+            if ($update_globally) {
+                $result = update_site_option(
+                    $option, $data);
             } else {
                 $result = update_blog_option(get_current_blog_id(), $option, $data);
             }

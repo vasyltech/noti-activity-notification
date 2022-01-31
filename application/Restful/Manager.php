@@ -263,15 +263,28 @@ class Manager
         if (!function_exists('dbDelta')) {
             require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
 
+            // Prepare the base directory to all setup assets
+            $basedir = NOTI_BASEDIR . '/setup';
+
             $sql = str_replace(
-                '%prefix%',
-                $wpdb->prefix,
-                file_get_contents(NOTI_BASEDIR . '/setup/db.sql')
+                '%prefix%', $wpdb->prefix, file_get_contents($basedir . '/db.sql')
             );
 
             dbDelta($sql);
 
             OptionManager::updateOption('noti-welcome', 0, true);
+
+            // Also insert the default settings
+            OptionManager::updateOption(
+                'noti-notifications',
+                file_get_contents($basedir . '/notifications.json'),
+                true
+            );
+            OptionManager::updateOption(
+                'noti-email-notification-tmpl',
+                file_get_contents($basedir . '/notification-email-tmpl.txt'),
+                true
+            );
         }
 
         return true;

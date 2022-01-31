@@ -20,6 +20,7 @@ class Autoloader
      */
     protected static $classmap = array(
         'Noti\Vendor\Parsedown' => self::BASEDIR . '/parsedown/Parsedown.php',
+        'Noti\Vendor\TemplateEngine\Manager' => self::BASEDIR . '/template-engine/Manager.php',
         'Psr\Http\Message\MessageInterface' => self::BASEDIR . '/psr-http-message/MessageInterface.php',
         'Psr\Http\Message\RequestInterface' => self::BASEDIR . '/psr-http-message/RequestInterface.php',
         'Psr\Http\Message\ResponseInterface' => self::BASEDIR . '/psr-http-message/ResponseInterface.php',
