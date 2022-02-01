@@ -2,6 +2,9 @@
 
 namespace Noti\Vendor\TemplateEngine;
 
+/**
+ * Origin - https://codeshack.io/lightweight-template-engine-php/
+ */
 class Manager
 {
 

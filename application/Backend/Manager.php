@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * ======================================================================
+ * LICENSE: This file is subject to the terms and conditions defined in *
+ * file 'LICENSE', which is part of this source code package.           *
+ * ======================================================================
+ */
+
 namespace Noti\Backend;
 
 use Noti\Core\OptionManager;
@@ -7,14 +14,27 @@ use Noti\Core\OptionManager;
 class Manager
 {
 
+    /**
+     * Undocumented variable
+     *
+     * @var [type]
+     */
     private static $_instance = null;
 
+    /**
+     * Undocumented variable
+     *
+     * @var array
+     */
     private $_pages = array(
         'noti',
         'noti-types',
         'noti-settings'
     );
 
+    /**
+     * Undocumented function
+     */
     protected function __construct()
     {
         add_action('admin_menu', function () {
@@ -173,31 +193,61 @@ class Manager
         }
     }
 
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
     public function renderWelcomePage()
     {
         require __DIR__ . '/Templates/welcome.php';
     }
 
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
     public function renderLogPage()
     {
         require __DIR__ . '/Templates/log.php';
     }
 
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
     public function renderEventTypesPage()
     {
         require __DIR__ . '/Templates/event.php';
     }
 
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
     public function renderCategoryPage()
     {
         require ABSPATH . 'wp-admin/edit-tags.php';
     }
 
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
     public function renderSettingsPage()
     {
         require __DIR__ . '/Templates/settings.php';
     }
 
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
     public function registerMetaboxes()
     {
         global $post;
@@ -227,6 +277,11 @@ class Manager
         }
     }
 
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
     public static function bootstrap()
     {
         if (is_null(self::$_instance)) {

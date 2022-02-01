@@ -10,12 +10,13 @@
                 $json = json_decode($post->post_content);
 
                 if ($json) {
-                    $raw = stripslashes(wp_json_encode($json, JSON_PRETTY_PRINT));
+                    $raw = wp_json_encode($json, JSON_PRETTY_PRINT);
                 } else {
-                    $raw = stripslashes($post->post_content);
+                    $raw = $post->post_content;
                 }
             } else {
-                $raw  = "{\n}";
+                $default  = "{\"Event\":\"action:\",\"Level\":\"notice\",\"RequiredVersion\":\"WordPress 5.7.0+\",\"Metadata\":{\"user_id\":\"\${USER.ID}\",\"user_ip\":\"\${USER.ip}\"},\"MessageMarkdown\":\"**\${FUNC.get_userdata(EVENT_META.user_id).display_name}** triggered the **\${EVENT_TYPE.post_title}** event\"}";
+                $raw      = wp_json_encode(json_decode($default), JSON_PRETTY_PRINT);
             }
         ?>
 

@@ -1,12 +1,25 @@
 <?php
 
+/**
+ * ======================================================================
+ * LICENSE: This file is subject to the terms and conditions defined in *
+ * file 'LICENSE', which is part of this source code package.           *
+ * ======================================================================
+ */
+
 namespace Noti\Core;
 
 class EventTypeManager
 {
 
+    /**
+     *
+     */
     const EVENT_TYPE = 'noti_event_type';
 
+    /**
+     *
+     */
     const EVENT_TYPE_CATEGORY = 'noti_event_type_cat';
 
     /**

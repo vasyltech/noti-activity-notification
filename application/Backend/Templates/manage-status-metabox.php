@@ -1,7 +1,4 @@
-<?php
-
-if (defined('NOTI_KEY')) {
-?>
+<?php if (defined('NOTI_KEY')) { ?>
     <style>
         #event-type-publisher .inside {
             padding: 12px 0 0 0;

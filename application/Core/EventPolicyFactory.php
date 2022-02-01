@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * ======================================================================
+ * LICENSE: This file is subject to the terms and conditions defined in *
+ * file 'LICENSE', which is part of this source code package.           *
+ * ======================================================================
+ */
+
 namespace Noti\Core;
 
 use Vectorface\Whip\Whip,
@@ -384,12 +391,7 @@ class EventPolicyFactory
      *
      * @return mixed
      *
-     * @since 6.3.0 Fixed bug that caused "Fatal error: Allowed memory size of XXX
-     *              bytes exhausted"
-     * @since 6.0.0 Initial implementation of the method
-     *
      * @access public
-     * @version 6.3.0
      */
     public static function getUserValue($prop)
     {
@@ -439,7 +441,6 @@ class EventPolicyFactory
      * @return void
      *
      * @access public
-     * @version 6.0.0
      */
     public static function getUserOptionValue($option_name)
     {
@@ -461,7 +462,6 @@ class EventPolicyFactory
      * @return void
      *
      * @access public
-     * @version 6.0.0
      */
     public static function getUserMetaValue($meta_key)
     {
@@ -491,7 +491,6 @@ class EventPolicyFactory
      * @return mixed
      *
      * @access public
-     * @version 6.3.0
      */
     public static function getWPOption($option)
     {
@@ -506,7 +505,6 @@ class EventPolicyFactory
      * @return mixed
      *
      * @access public
-     * @version 6.2.0
      */
     public static function getSiteParam($param)
     {
@@ -529,7 +527,6 @@ class EventPolicyFactory
      * @return mixed
      *
      * @access public
-     * @version 6.3.0
      */
     public static function getGlobalVariable($var)
     {
@@ -544,7 +541,6 @@ class EventPolicyFactory
      * @return mixed
      *
      * @access public
-     * @version 6.3.0
      */
     public static function getNetworkOption($option)
     {
