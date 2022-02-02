@@ -1,6 +1,3 @@
-# Create the tables structure
-# ------------------------------------------------------------
-
 DROP TABLE IF EXISTS `%prefix%noti_events`;
 
 CREATE TABLE `%prefix%noti_events` (

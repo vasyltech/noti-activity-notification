@@ -223,7 +223,7 @@ class MarkerManager
 
         foreach(explode('.', $path) as $l) {
             if (is_object($value)) {
-                if (isset($value, $l)) {
+                if (isset($value->{$l})) {
                     $value = $value->{$l};
                 } else {
                     $value = null;

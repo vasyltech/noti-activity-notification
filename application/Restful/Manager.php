@@ -269,29 +269,38 @@ class Manager
 
         if (!function_exists('dbDelta')) {
             require_once(ABSPATH . 'wp-admin/includes/upgrade.php');
+        }
 
-            // Prepare the base directory to all setup assets
-            $basedir = NOTI_BASEDIR . '/setup';
+        // Prepare the base directory to all setup assets
+        $basedir = NOTI_BASEDIR . '/setup';
 
-            $sql = str_replace(
-                '%prefix%', $wpdb->prefix, file_get_contents($basedir . '/db.sql')
-            );
+        $sql = str_replace(
+            '%prefix%', $wpdb->prefix, file_get_contents($basedir . '/install.sql')
+        );
 
-            dbDelta($sql);
+        dbDelta($sql);
 
-            OptionManager::updateOption('noti-welcome', 0, true);
+        OptionManager::updateOption('noti-welcome', 0, true);
 
-            // Also insert the default settings
-            OptionManager::updateOption(
-                'noti-notifications',
-                file_get_contents($basedir . '/notifications.json'),
-                true
-            );
-            OptionManager::updateOption(
-                'noti-email-notification-tmpl',
-                file_get_contents($basedir . '/notification-email-tmpl.txt'),
-                true
-            );
+        // Also insert the default settings
+        OptionManager::updateOption(
+            'noti-notifications',
+            file_get_contents($basedir . '/notifications.json'),
+            true
+        );
+        OptionManager::updateOption(
+            'noti-email-notification-tmpl',
+            file_get_contents($basedir . '/notification-email-tmpl.txt'),
+            true
+        );
+
+        // Registering two scheduled jobs
+        if (!wp_next_scheduled('noti_cleanup_log')) {
+            wp_schedule_event(time(), 'twicedaily', 'noti_cleanup_log');
+        }
+
+        if (!wp_next_scheduled('noti_send_notifications')) {
+            wp_schedule_event(time(), 'noti_interval', 'noti_send_notifications');
         }
 
         return true;
@@ -340,7 +349,7 @@ class Manager
                         if ($term_id) {
                             wp_set_post_terms(
                                 $post_id,
-                                $term['term_id'],
+                                $term_id,
                                 EventTypeManager::EVENT_TYPE_CATEGORY,
                                 true
                             );

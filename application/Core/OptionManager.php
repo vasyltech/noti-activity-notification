@@ -60,4 +60,31 @@ class OptionManager
         return $result;
     }
 
+    /**
+     * Undocumented function
+     *
+     * @param [type] $option
+     *
+     * @return boolean
+     */
+    public static function deleteOption($option)
+    {
+        if (is_multisite()) {
+            $result = delete_site_option($option);
+        } else {
+            $result = delete_option($option);
+        }
+
+        return $result;
+    }
+
+    public static function reset()
+    {
+        self::deleteOption('noti-welcome');
+        self::deleteOption('noti-notifications');
+        self::deleteOption('noti-keep-logs');
+        self::deleteOption('noti-cleanup-type');
+        self::deleteOption('noti-email-notification-tmpl');
+    }
+
 }

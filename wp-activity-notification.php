@@ -15,7 +15,9 @@
  *
  **/
 
-use Noti\Core\Manager as CoreManager,
+use Noti\Core\OptionManager,
+    Noti\Core\EventTypeManager,
+    Noti\Core\Manager as CoreManager,
     Noti\Backend\Manager as BackendManager,
     Noti\Restful\Manager as RestfulManager;
 
@@ -124,6 +126,50 @@ class NotiActivityNotification
      */
     public static function uninstall()
     {
+        global $wpdb;
+
+        // Delete all related to the plugin DB tables
+		$wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}noti_eventmeta`");
+		$wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}noti_events`");
+		$wpdb->query("DROP TABLE IF EXISTS `{$wpdb->prefix}noti_subscribers`");
+
+        // Making sure that all necessary taxonoies and post types are registered
+        // prior to deletion
+        EventTypeManager::bootstrap();
+
+        // Delete all the event types
+        $types = get_posts(array(
+            'post_type'   => EventTypeManager::EVENT_TYPE,
+            'numberposts' => -1,
+            'post_status' => 'any',
+        ));
+
+        foreach($types as $type) {
+            wp_delete_post($type->ID, true);
+        }
+
+        // Deleting all categories
+        $terms = get_terms(array(
+            'taxonomy'   => EventTypeManager::EVENT_TYPE_CATEGORY,
+            'hide_empty' => false,
+            'fields'     =>'ids'
+        ));
+
+        foreach($terms as $id) {
+            wp_delete_term($id, EventTypeManager::EVENT_TYPE_CATEGORY);
+        }
+
+        // Delete all the options associated with the plugin
+        OptionManager::reset();
+
+        // Deleting scheduled jobs
+        if (wp_next_scheduled('noti_cleanup_log')) {
+            wp_unschedule_hook('noti_cleanup_log');
+        }
+
+        if (!wp_next_scheduled('noti_send_notifications')) {
+            wp_unschedule_hook('noti_send_notifications');
+        }
     }
 
 }

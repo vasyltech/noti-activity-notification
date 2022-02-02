@@ -45,6 +45,13 @@ class Manager
             return $func;
         }, 10, 2);
 
+        add_filter('cron_schedules', function($schedules) {
+            return array_merge($schedules, array('noti_interval' => array(
+                'interval' => 60,
+                'display'  => __('Every Minute')
+            )));
+        });
+
         add_action('noti_cleanup_log', function() {
             $type = OptionManager::getOption('noti-cleanup-type', 'soft');
 
@@ -68,21 +75,6 @@ class Manager
         add_action('noti_send_notifications', function () {
             NotificationManager::trigger();
         });
-
-        if (!wp_next_scheduled('noti_cleanup_log')) {
-            wp_schedule_event(time(), 'twicedaily', 'noti_cleanup_log');
-        }
-
-        add_filter('cron_schedules', function($schedules) {
-            return array_merge($schedules, array('noti_interval' => array(
-                'interval' => 60,
-                'display'  => __('Every Minute')
-            )));
-        });
-
-        if (!wp_next_scheduled('noti_send_notifications')) {
-            wp_schedule_event(time(), 'noti_interval', 'noti_send_notifications');
-        }
     }
 
     /**
