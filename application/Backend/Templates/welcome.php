@@ -12,11 +12,11 @@
                         </p>
 
                         <p>
-                            By selecting the "Let's Get Started" button below, the plugin will attempt to create 3 new database tables that are used to store captured events as well as subscribers (those who chose to receive notifications for selected event types). We also recommend to automatically install all officially available pre-configured event types. They will be stored as private custom post types in the posts table and you can edit, duplicate or delete them at any time.
+                            By selecting the "Let's Get Started" button below, the plugin will attempt to create 3 new database tables that are used to store captured events as well as subscribers (those who chose to receive notifications for selected event types). It is also recommended to automatically install all officially available pre-configured event types. They will be stored as private custom post types in the posts table and you can edit, duplicate or delete them at any time.
                         </p>
 
                         <p>
-                            Currently we have <strong id="event-types-count"></strong> different event types pre-configured. Would you like to automatically download and install them for you? For more information, please refer <a href="https://github.com/vasyltech/noti-event-types" target="_blank">to this page</a>.
+                            Currently there are <strong id="event-types-count"></strong> different event types pre-configured. Would you like to automatically download and install them? For more information, please refer <a href="https://github.com/vasyltech/noti-event-types" target="_blank">to this page</a>.
                         </p>
                         <input type="checkbox" checked id="install-event-types" /> Yes please, download &amp; install pre-configured event types.<br />
 
@@ -24,9 +24,7 @@
                             <input type="button" id="setup" class="button button-primary" value="Let's Get Started">
                         </div>
                     </td>
-                    <td width="50%">
-                        <iframe width="560" height="315" src="https://www.youtube.com/embed/9vYULN-72Oo" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                    </td>
+                    <td width="50%">&nbsp;</td>
                 </tr>
             </tbody>
         </table>

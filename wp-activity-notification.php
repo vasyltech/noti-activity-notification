@@ -2,7 +2,7 @@
 
 /**
  * Plugin Name: WP Activity Notification
- * Description: Track any activity and notify them in the near-to-realtime
+ * Description: Totally free, infinitely configurable, and powerful website activity monitoring and alerting plugin for WordPress projects of any scale.
  * Version: 0.0.1
  * Author: Vasyl Martyniuk <vasyl@vasyltech.com>
  * Author URI: https://vasyltech.com
