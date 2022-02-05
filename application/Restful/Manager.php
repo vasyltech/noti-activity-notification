@@ -189,11 +189,11 @@ class Manager
         foreach ($types as $type) {
             $response['data'][] = array(
                 $type['id'],
-                esc_js($type['title']),
-                esc_js($type['description']),
+                htmlspecialchars($type['title']),
+                htmlspecialchars($type['description']),
                 $type['status'],
                 $type['actions'],
-                esc_js($type['required_version'])
+                htmlspecialchars($type['required_version'])
             );
         }
 

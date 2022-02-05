@@ -463,10 +463,14 @@ class Repository
 
         $prefix = self::getTablePrefix();
 
-        $query  = "SELECT * FROM {$prefix}posts ";
-        $query .= 'WHERE guid = %s';
+        $query  = "SELECT p.* FROM {$prefix}posts AS p LEFT JOIN {$prefix}postmeta";
+        $query .= ' AS m ON (p.ID = m.post_id) WHERE m.meta_key = %s ';
+        $query .= 'AND m.meta_value = %s AND p.post_type = %s ORDER BY ID DESC ';
+        $query .= 'LIMIT 1';
 
-        return $wpdb->get_row($wpdb->prepare($query, $guid));
+        return $wpdb->get_row($wpdb->prepare(
+            $query, 'guid', $guid, EventTypeManager::EVENT_TYPE
+        ));
     }
 
     /**

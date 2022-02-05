@@ -13,7 +13,7 @@ if (defined('NOTI_KEY')) {
 ?>
     <div class="wrap">
         <h1 class="wp-heading-inline">
-            <?php echo __('Events', NOTI_KEY); ?>
+            <?php echo __('Activity Log', NOTI_KEY); ?>
         </h1>
 
         <hr class="wp-header-end">

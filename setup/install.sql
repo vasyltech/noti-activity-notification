@@ -1,5 +1,3 @@
-DROP TABLE IF EXISTS `%prefix%noti_events`;
-
 CREATE TABLE `%prefix%noti_events` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `site_id` bigint(20) NOT NULL,
@@ -14,8 +12,6 @@ CREATE TABLE `%prefix%noti_events` (
   UNIQUE KEY `aggregate` (`site_id`,`hash`,`post_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `%prefix%noti_eventmeta`;
-
 CREATE TABLE `%prefix%noti_eventmeta` (
   `meta_id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `event_id` bigint(20) NOT NULL,
@@ -24,8 +20,6 @@ CREATE TABLE `%prefix%noti_eventmeta` (
   PRIMARY KEY (`meta_id`),
   UNIQUE KEY `event_id` (`event_id`,`meta_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-DROP TABLE IF EXISTS `%prefix%noti_subscribers`;
 
 CREATE TABLE `%prefix%noti_subscribers` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,

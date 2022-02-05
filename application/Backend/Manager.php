@@ -44,19 +44,21 @@ class Manager
 
             if ($need_welcome) {
                 add_menu_page(
-                    __('Events', NOTI_KEY),
-                    __('Events', NOTI_KEY),
+                    __('Activity Log', NOTI_KEY),
+                    __('Activity Log', NOTI_KEY),
                     'administrator',
                     'noti',
-                    array($this, 'renderWelcomePage')
+                    array($this, 'renderWelcomePage'),
+                    file_get_contents(NOTI_MEDIA . '/active-menu.data')
                 );
             } else {
                 add_menu_page(
-                    __('Events', NOTI_KEY),
-                    __('Events', NOTI_KEY),
+                    __('Activity Log', NOTI_KEY),
+                    __('Activity Log', NOTI_KEY),
                     'administrator',
                     'noti',
-                    array($this, 'renderLogPage')
+                    array($this, 'renderLogPage'),
+                    file_get_contents(NOTI_MEDIA . '/active-menu.data')
                 );
 
                 add_submenu_page(

@@ -23,7 +23,7 @@
         <textarea id="event-type-content" name="event-type-content"  class="event-type-content" rows="10"><?php echo htmlspecialchars($raw); ?></textarea>
 
         <p>
-            Excerpts are optional hand-crafted summaries of your content that can be used in your theme. <a href="https://wordpress.org/support/article/excerpt/">Learn more about manual excerpts</a>.
+            For more information about managing raw event type configurations, please refer to <a href="https://github.com/vasyltech/noti-event-types" target="_blank">this page</a>.
         </p>
 
         <script type='text/javascript'>
