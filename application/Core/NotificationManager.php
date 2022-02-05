@@ -283,7 +283,7 @@ class NotificationManager
 
             $result = wp_mail(
                 $package->Receivers,
-                $package->Subject ?? __('WP Activity Notifications'),
+                $package->Subject ?? __('Noti: Activity Notifications'),
                 $body,
                 array_merge(
                     is_array($package->Headers) ? $package->Headers : array(),

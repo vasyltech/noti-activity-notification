@@ -1,4 +1,4 @@
-=== WP Activity Notifications ===
+=== Noti - Activity Notifications ===
 Contributors: vasyltech
 Tags: user activity, audit log, notifications, tracking
 Requires at least: 4.7.0
@@ -10,26 +10,25 @@ Totally free, infinitely configurable, and powerful website activity monitoring 
 
 == Description ==
 
-> WP Activity Notifications plugin is your single-stop shop for all you need to track any WordPress website activities. And it is completely free.
+> Noti - Activity Notifications (aka Noti) plugin is your single-stop shop for all you need to track any WordPress website activities. And it is completely free.
 
 
 A FEW QUICK FACTS
 
-* WP Activity Notifications is completely free of any charges. All the code that runs on your server(s) will always be free. There are no hidden fees, PRO versions, paid add-ons, extensions, etc.
-* WP Activity Notifications is also known as Noti.
+* Noti is completely free of any charges. All the code that runs on your server(s) will always be free. There are no hidden fees, PRO versions, paid add-ons, extensions, etc.
 * Noti does not capture or send externally any information about your website or how the plugin is used.
 * Noti does not include advertisements of any kind (no banners, cross-sales pitches, or affiliate links).
 * Noti functionality is based on the WordPress core concept of actions and filters. So, inherently, it integrates with ALL WordPress plugins, themes, and WordPress core itself.
 * You can create an infinite number of event types to track or use any existing event types from [the official repository](https://github.com/vasyltech/noti-event-types) that is continuously growing.
 * It works well on both single and multi-site WordPress websites.
 * Noti comes with a powerful and flexible conditions library so you can define under which condition(s) to track desired activities.
-* The initial WP Activity Notifications version already includes three different ways to send alerts (via WordPress embedded email function, webhooks and dump logs into a file). More free notification types will be available as the plugin evolves.
+* The initial plugin's version already includes three different ways to send alerts (via WordPress embedded email function, webhooks and dump logs into a file). More free notification types will be available as the plugin evolves.
 * Noti is optimized for large-scale websites and comes with the ability to aggregate similar events over a defined period of time. This potentially can reduce DB storage usage by 50% or more.
 
 
 HOW DOES IT WORK?
 
-WP Activity Notifications is based on the WordPress core concept of hooks (actions and filters). When a hook is triggered, it typically carries enough information about the event. That is why 9 out of 10 times it is just a matter of “listening” for certain hooks and storing carried information in DB. Of course, sometimes, you have to take into account certain conditions, enrich information by calling some other function, or even combine data from multiple hooks. The good thing is that Noti allows you to do all this without writing a single line of code.
+Noti is based on the WordPress core concept of hooks (actions and filters). When a hook is triggered, it typically carries enough information about the event. That is why 9 out of 10 times it is just a matter of “listening” for certain hooks and storing carried information in DB. Of course, sometimes, you have to take into account certain conditions, enrich information by calling some other function, or even combine data from multiple hooks. The good thing is that Noti allows you to do all this without writing a single line of code.
 
 To be able to “listen” for any hook, you create a new event type and specify with just a few lines of JSON-based configurations the hook you want to listen to, information that you want to capture, and, if needed, conditions under which event should be captured. Configurations may look intimidating at first, so please do not hesitate to reach out to me and I will guide you through the process and help you to define the desired event type.
 
@@ -54,7 +53,7 @@ Also, you are welcome to contribute to the product with your code, transactions,
 
 == Installation ==
 
-1. Upload `wp-activity-notification` folder to the `/wp-content/plugins/` directory
+1. Upload `noti-activity-notification` folder to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
 
 == Screenshots ==
