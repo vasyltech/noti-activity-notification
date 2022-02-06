@@ -162,12 +162,8 @@ class EventPolicyFactory
                     );
 
                     // Also parse all the listeners if defined
-                    if (isset($json->Listener)) {
-                        if(is_array($json->Listener)) {
-                            $listeners = $json->Listener;
-                        } else {
-                            $listeners = [$json->Listener];
-                        }
+                    if (isset($json->Listeners) && is_array($json->Listeners)) {
+                        $listeners = $json->Listeners;
                     } else {
                         $listeners = array();
                     }

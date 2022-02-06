@@ -5,6 +5,8 @@ Requires at least: 4.7.0
 Requires PHP: 7.0.0
 Tested up to: 5.9.0
 Stable tag: 0.0.1
+License: GPLv2 or later
+License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
 Totally free, infinitely configurable, and powerful website activity monitoring and alerting plugin for WordPress projects of any scale.
 
