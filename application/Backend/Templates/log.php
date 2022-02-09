@@ -1,9 +1,15 @@
 <?php
 
+/**
+ * ======================================================================
+ * LICENSE: This file is subject to the terms and conditions defined in *
+ * file 'LICENSE', which is part of this source code package.           *
+ * ======================================================================
+ */
+
 use Noti\Core\Repository;
 
 if (defined('NOTI_KEY')) {
-
     // Hydrate the level list
     $levels = Repository::getEventLevelCounts();
     $totals = array_sum($levels);
@@ -72,5 +78,4 @@ if (defined('NOTI_KEY')) {
             </select>
         </div>
     </div>
-<?php
-}
+<?php }

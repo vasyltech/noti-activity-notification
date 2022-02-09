@@ -167,7 +167,7 @@ class Manager
                 ), $this->prepareEventMetadata($manager));
             }
 
-            return array_pop($args);
+            return array_shift($args);
         };
 
         // Now register the hook
@@ -192,7 +192,7 @@ class Manager
                     ListenerManager::addToScope($scope, $i, $manager->Metadata);
                 }
 
-                return array_pop($args);
+                return array_shift($args);
             };
 
             $this->registerHook($listener->type, $listener->hook, $listener_cb);

@@ -12,7 +12,7 @@ Totally free, infinitely configurable, and powerful website activity monitoring 
 
 == Description ==
 
-> Noti - Activity Notifications (aka Noti) plugin is your single-stop shop for all you need to track any WordPress website activities. And it is completely free.
+> Noti - Activity Notification (aka Noti) plugin is your single-stop shop for all you need to track any WordPress website activities. And it is completely free.
 
 
 A FEW QUICK FACTS
@@ -21,7 +21,8 @@ A FEW QUICK FACTS
 * Noti does not capture or send externally any information about your website or how the plugin is used.
 * Noti does not include advertisements of any kind (no banners, cross-sales pitches, or affiliate links).
 * Noti functionality is based on the WordPress core concept of actions and filters. So, inherently, it integrates with ALL WordPress plugins, themes, and WordPress core itself.
-* You can create an infinite number of event types to track or use any existing event types from [the official repository](https://github.com/vasyltech/noti-event-types) that is continuously growing.
+* You can create an infinite number of event types to track or use any existing event types from [the public Github repository](https://github.com/vasyltech/noti-event-types) that is continuously growing.
+* During the initial plugin setup, you'll have the option to automatically download and install all official event types on your server, you can cherry-pick any desired event type from [the public Github repository](https://github.com/vasyltech/noti-event-types).
 * It works well on both single and multi-site WordPress websites.
 * Noti comes with a powerful and flexible conditions library so you can define under which condition(s) to track desired activities.
 * The initial plugin's version already includes three different ways to send alerts (via WordPress embedded email function, webhooks and dump logs into a file). More free notification types will be available as the plugin evolves.
@@ -43,7 +44,7 @@ WHY IS IT FREE? WHERE IS A CATCH?
 
 Seriously. No catch. No hidden agenda. I wanted to build this product for years and finally, while experiencing quite a bumpy time in my personal life, I found a remedy in building Noti.
 
-I'm a financially independent principal engineer leading a handful of strategic digital products for the biggest digital media company in the Western hemisphere. On another hand, I also maintain one of the most popular user access management plugins, [Advanced Access Manager](https://wordpress.org/plugins/advanced-access-manager/) which generate great passive income for me. In short, money is not a priority anymore, so it was time for me to start giving something back.
+I'm a financially independent principal engineer leading a handful of strategic digital products for the biggest digital media company in the Western hemisphere. On another hand, I also maintain one of the most popular user access management plugins, [Advanced Access Manager](https://wordpress.org/plugins/advanced-access-manager/) which generates great passive income for me. In short, money is not a priority anymore, so it was time for me to start giving something back.
 
 
 HOW DOES SUPPORT WORK?
@@ -61,10 +62,10 @@ Also, you are welcome to contribute to the product with your code, transactions,
 == Screenshots ==
 
 1. Event Log with the list of captured events
-2. Event type list with ability to create new types
+2. Event type list with the ability to create new types
 3. Manage existing event types or create new
 4. Group event types into categories
-5. Configure basic settings, notification types and email template
+5. Configure basic settings, notification types, and email template
 
 == Changelog ==
 

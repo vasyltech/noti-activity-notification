@@ -1,34 +1,37 @@
 <?php
 
+/**
+ * ======================================================================
+ * LICENSE: This file is subject to the terms and conditions defined in *
+ * file 'LICENSE', which is part of this source code package.           *
+ * ======================================================================
+ */
+
 use Noti\Core\OptionManager;
 
 if (defined('NOTI_KEY')) {
-?>
+    // Prepare the raw settings for displaying
+    $raw   = null;
+    $error = null;
+    $json  = OptionManager::getOption('noti-notifications');
+    $keep  = OptionManager::getOption('noti-keep-logs', 60);
+    $type  = OptionManager::getOption('noti-cleanup-type', 'soft');
 
-    <div class="wrap">
-        <h1>Settings</h1>
-
-        <?php
-        // Prepare the raw settings for displaying
-        $raw   = null;
-        $error = null;
-        $json  = OptionManager::getOption('noti-notifications');
-        $keep  = OptionManager::getOption('noti-keep-logs', 60);
-        $type  = OptionManager::getOption('noti-cleanup-type', 'soft');
+    if ($json) {
+        $json = json_decode($json);
 
         if ($json) {
-            $json = json_decode($json);
-
-            if ($json) {
-                $raw = stripslashes(wp_json_encode($json, JSON_PRETTY_PRINT));
-            } else {
-                $error = json_last_error_msg();
-                $raw   = stripslashes($json);
-            }
+            $raw = stripslashes(wp_json_encode($json, JSON_PRETTY_PRINT));
         } else {
-            $raw  = "{\n}";
+            $error = json_last_error_msg();
+            $raw   = stripslashes($json);
         }
-        ?>
+    } else {
+        $raw  = "{\n}";
+    }
+?>
+    <div class="wrap">
+        <h1>Settings</h1>
 
         <form method="post" action="options.php" id="settings-form">
             <input type="hidden" name="option_page" value="noti-settings">

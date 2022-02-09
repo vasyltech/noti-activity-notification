@@ -305,24 +305,17 @@ class NotificationManager
                 );
             }
         } elseif ($package->Type === 'webhook') {
-            $ch = curl_init();
-
-            curl_setopt($ch, CURLOPT_URL, $package->Url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+            $args = array(
+                'body'   => json_encode($package->Messages),
+                'method' => $package->Method ?? 'POST'
+            );
 
             if (property_exists($package, 'Headers') && is_array($package->Headers)) {
-                curl_setopt($ch, CURLOPT_HTTPHEADER, $package->Headers);
+                $args['headers'] = $package->Headers;
             }
 
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $package->Method ?? 'POST');
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($package->Messages));
-
-            curl_exec($ch);
-
-            $code   = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-            $result = $code >= 200 && $code < 299;
-
-            curl_close($ch);
+            $response = wp_remote_request($package->Url, $args);
+            $result   = !is_wp_error($response);
         }
 
         return $result;

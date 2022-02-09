@@ -1,7 +1,13 @@
 <?php
 
-if (defined('NOTI_KEY')) {
+/**
+ * ======================================================================
+ * LICENSE: This file is subject to the terms and conditions defined in *
+ * file 'LICENSE', which is part of this source code package.           *
+ * ======================================================================
+ */
 
+if (defined('NOTI_KEY')) {
     $num_posts   = wp_count_posts('noti_event_type', 'readable');
     $total_posts = $num_posts->publish + $num_posts->draft;
     $has_trashed = false;
@@ -32,11 +38,11 @@ if (defined('NOTI_KEY')) {
         <input type="hidden" id="noti-page-id" value="event-types" />
 
         <ul class="subsubsub">
-            <li class="any"><a href="#" class="current" aria-current="page">All <span class="count">(<?php echo $total_posts; ?>)</span></a> |</li>
-            <li class="publish"><a href="#">Active <span class="count">(<?php echo $num_posts->publish; ?>)</span></a> |</li>
-            <li class="draft"><a href="#">Inactive <span class="count">(<?php echo $num_posts->draft; ?>)</span></a><?php echo $has_trashed ? ' |' : ''; ?></li>
+            <li class="any"><a href="#" class="current" aria-current="page">All <span class="count">(<?php echo intval($total_posts); ?>)</span></a> |</li>
+            <li class="publish"><a href="#">Active <span class="count">(<?php echo intval($num_posts->publish); ?>)</span></a> |</li>
+            <li class="draft"><a href="#">Inactive <span class="count">(<?php echo intval($num_posts->draft); ?>)</span></a><?php echo $has_trashed ? ' |' : ''; ?></li>
             <?php if ($has_trashed) { ?>
-                <li class="trash"><a href="#">Trash <span class="count">(<?php echo $num_posts->trash; ?>)</span></a></li>
+                <li class="trash"><a href="#">Trash <span class="count">(<?php echo intval($num_posts->trash); ?>)</span></a></li>
             <?php } ?>
         </ul>
         <input type="hidden" id="event-type-status" value="any" />
@@ -72,5 +78,4 @@ if (defined('NOTI_KEY')) {
 
         <div class="hidden" id="category-list"><?php echo $categories; ?></div>
     </div>
-<?php
-}
+<?php }
