@@ -1,0 +1,24 @@
+{
+    "Event": "filter:upgrader_install_package_result",
+    "Level": "critical",
+    "RequiredVersion": "WordPress 5.7.0+",
+    "Metadata": {
+        "user_id": "${USER.ID}",
+        "user_ip": "${USER.ip}",
+        "theme": "${FUNC.wp_get_theme(ARGS.1.theme).name}"
+    },
+    "Condition": {
+        "Equals": {
+            "(*boolean)${FUNC.is_wp_error(ARGS.0)}": false
+        },
+        "NotEquals": {
+            "(*null)${ARGS.1.theme}": null
+        }
+    },
+    "MessageMarkdown": "**${FUNC.get_userdata(EVENT_META.user_id).display_name}** upgraded the **${EVENT_META.theme}** theme",
+    "Notifications": [
+        {
+            "Type": "email"
+        }
+    ]
+}

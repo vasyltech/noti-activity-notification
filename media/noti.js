@@ -6,16 +6,6 @@
     const StillTyping = {};
 
     /**
-     *
-     */
-    const BASE_GITHUB_URL = 'https://raw.githubusercontent.com/vasyltech/noti-event-types/main/';
-
-    /**
-     *
-     */
-    const EventTypeRegistry = [];
-
-    /**
      * Check if user is still typing
      *
      * @param {Object} input
@@ -399,101 +389,27 @@
      *
      */
     const InitializeWelcomeScreen = () => {
-        /**
-     *
-     */
-        function InstallEventTypes() {
-            $.ajax(GetLocal('apiEntpoint') + '/event-types', {
-                type: 'POST',
-                dataType: 'json',
-                data: JSON.stringify(EventTypeRegistry),
-                beforeSend: function () {
-                    $('#setup').val('Installing events...');
-                },
-                headers: {
-                    'X-WP-Nonce': GetLocal('apiNonce')
-                },
-                success: function () {
-                },
-                error: function () {
-                    //
-                },
-                complete: function () {
-                    location.reload();
-                }
-            });
-        }
 
-        /**
-         *
-         */
-        function DownloadEventTypes() {
-            let counter = EventTypeRegistry.length;
-
-            for (const type of EventTypeRegistry) {
-                $.ajax(`${BASE_GITHUB_URL}/event-types/${type.guid}.json`, {
-                    type: 'GET',
-                    dataType: 'json',
-                    async: false,
-                    beforeSend: function () {
-                        $('#setup').val(`Downloading ${counter} Events...`);
-                    },
-                    success: function (response) {
-                        type.policy = response;
-                    },
-                    error: function (response) {
-                    },
-                    complete: function () {
-                        counter--;
-                    }
-                });
-            }
-
-            InstallEventTypes();
-        }
-
-        /**
-         *
-         */
-        function SetupDatabase() {
-            $('#setup').val('Configuring Database...');
+        $('#setup').bind('click', function () {
+            $(this).attr('disabled', true);
+            $(this).val('Configuring Plugin. Please wait...');
 
             $.ajax(GetLocal('apiEntpoint') + '/setup', {
                 type: 'POST',
                 headers: {
                     'X-WP-Nonce': GetLocal('apiNonce')
                 },
+                dataType: 'json',
+                data: {
+                    installTypes: $('#install-event-types').is(':checked')
+                },
                 success: function () {
-                    console.log('here');
-                    if ($('#install-event-types').is(':checked')) {
-                        DownloadEventTypes();
-                    } else {
-                        location.reload();
-                    }
+                    location.reload();
                 },
                 error: function () {
                     //
                 }
             });
-        }
-
-        // Loading the official event type registry
-        $.ajax(`${BASE_GITHUB_URL}/registry.json`, {
-            type: 'GET',
-            dataType: 'json',
-            success: function (response) {
-                EventTypeRegistry.push(...response);
-                $('#event-types-count').text(response.length);
-            },
-            error: function (response) {
-            }
-        });
-
-        $('#setup').bind('click', function () {
-            $(this).attr('disabled', true);
-            $(this).val('Configuring Plugin. Please wait...');
-
-            SetupDatabase();
         });
     }
 

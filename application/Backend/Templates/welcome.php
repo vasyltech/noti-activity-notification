@@ -7,7 +7,10 @@
  * ======================================================================
  */
 
-if (defined('NOTI_KEY')) { ?>
+if (defined('NOTI_KEY')) {
+    // Get number of available post types for installation
+    $count = count(json_decode(file_get_contents(NOTI_BASEDIR . '/setup/registry.json')));
+?>
     <div class="wrap">
         <h1>Welcome</h1>
 
@@ -25,9 +28,9 @@ if (defined('NOTI_KEY')) { ?>
                         </p>
 
                         <p>
-                            Currently there are <strong id="event-types-count"></strong> different event types pre-configured. Would you like to automatically download and install them? For more information, please refer <a href="https://github.com/vasyltech/noti-event-types" target="_blank">to this page</a>.
+                            Currently there are <strong><?php echo intval($count); ?></strong> different event types pre-configured. Would you like to automatically install them? For more information about post types and how they work, please refer <a href="https://github.com/vasyltech/noti-event-types" target="_blank">to this page</a>.
                         </p>
-                        <input type="checkbox" checked id="install-event-types" /> Yes please, download &amp; install pre-configured event types.<br />
+                        <input type="checkbox" checked id="install-event-types" /> Yes please, install pre-configured event types.<br />
 
                         <div style="margin-top: 30px;">
                             <input type="button" id="setup" class="button button-primary" value="Let's Get Started">

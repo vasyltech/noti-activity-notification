@@ -1,6 +1,6 @@
 Howdy, there.
 
-Below is the list of recently observed activity on your website.
+Below is the list of recently observed activity on the {% bloginfo() %} website.
 
 =============
 {% foreach($messages as $message): %}

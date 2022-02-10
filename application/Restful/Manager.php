@@ -63,7 +63,10 @@ class Manager
                 'callback' => array($this, 'setup'),
                 'permission_callback' => function () {
                     return current_user_can('administrator');
-                }
+                },
+                'args' => array(
+                    'installTypes' => array('type' => 'boolean')
+                )
             ));
 
             register_rest_route('noti/v1', '/event-types', array(
@@ -263,7 +266,7 @@ class Manager
      *
      * @return void
      */
-    public function setup()
+    public function setup(WP_REST_Request $request)
     {
         global $wpdb;
 
@@ -275,7 +278,9 @@ class Manager
         $basedir = NOTI_BASEDIR . '/setup';
 
         $sql = str_replace(
-            '%prefix%', $wpdb->prefix, file_get_contents($basedir . '/install.sql')
+            '%prefix%',
+            $wpdb->prefix,
+            file_get_contents($basedir . '/install.sql')
         );
 
         dbDelta($sql);
@@ -303,19 +308,36 @@ class Manager
             wp_schedule_event(time(), 'noti_interval', 'noti_send_notifications');
         }
 
+        // Finally, if user chose to also install available event types, do so
+        if ($request->get_param('installTypes')) {
+            $types    = array();
+            $registry = json_decode(
+                file_get_contents(NOTI_BASEDIR . '/setup/registry.json')
+            );
+
+            foreach ($registry as $item) {
+                $item->policy = json_decode(file_get_contents(
+                    NOTI_BASEDIR . '/setup/event-types/' . $item->guid . '.json'
+                ));
+
+                array_push($types, $item);
+            }
+
+            $this->installPostTypes($types);
+        }
+
         return true;
     }
 
     /**
      * Undocumented function
      *
-     * @param WP_REST_Request $request
+     * @param array $types
+     *
      * @return void
      */
-    public function installPostTypes(WP_REST_Request $request)
+    protected function installPostTypes($types)
     {
-        $types = json_decode($request->get_body());
-
         foreach ($types as $type) {
             $existing = Repository::getPostTypeByGuid($type->guid);
 

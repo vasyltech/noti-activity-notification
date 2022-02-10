@@ -1,0 +1,22 @@
+{
+    "Event": "action:upgrader_process_complete",
+    "Level": "critical",
+    "RequiredVersion": "WordPress 5.5.0+",
+    "Metadata": {
+        "user_id": "${USER.ID}",
+        "user_ip": "${USER.ip}",
+        "plugin": "${ARGS.0.new_plugin_data.Name}"
+    },
+    "Condition": {
+        "Equals": {
+            "${ARGS.1.action}": "install",
+            "${ARGS.1.type}": "plugin"
+        }
+    },
+    "MessageMarkdown": "**${FUNC.get_userdata(EVENT_META.user_id).display_name}** installed the **${EVENT_META.plugin}** plugin",
+    "Notifications": [
+        {
+            "Type": "email"
+        }
+    ]
+}

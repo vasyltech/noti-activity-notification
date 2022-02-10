@@ -145,14 +145,14 @@ class NotificationManager
                         );
 
                         if (count($subscribers)) {
-                            $candidate->Subscribers = array();
+                            $candidate->Receivers = array();
 
                             foreach($subscribers as $subscriber) {
                                 $user = get_user_by('id', $subscriber);
 
                                 if (is_a($user, 'WP_User')) {
                                     array_push(
-                                        $candidate->Subscribers, $user->user_email
+                                        $candidate->Receivers, $user->user_email
                                     );
                                 }
                             }

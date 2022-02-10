@@ -22,7 +22,6 @@ A FEW QUICK FACTS
 * Noti does not include advertisements of any kind (no banners, cross-sales pitches, or affiliate links).
 * Noti functionality is based on the WordPress core concept of actions and filters. So, inherently, it integrates with ALL WordPress plugins, themes, and WordPress core itself.
 * You can create an infinite number of event types to track or use any existing event types from [the public Github repository](https://github.com/vasyltech/noti-event-types) that is continuously growing.
-* During the initial plugin setup, you'll have the option to automatically download and install all official event types on your server, you can cherry-pick any desired event type from [the public Github repository](https://github.com/vasyltech/noti-event-types).
 * It works well on both single and multi-site WordPress websites.
 * Noti comes with a powerful and flexible conditions library so you can define under which condition(s) to track desired activities.
 * The initial plugin's version already includes three different ways to send alerts (via WordPress embedded email function, webhooks and dump logs into a file). More free notification types will be available as the plugin evolves.

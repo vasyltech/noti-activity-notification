@@ -1,0 +1,149 @@
+[
+    {
+        "guid": "3914d6fc-4c88-4e4a-90c9-8925968506e5",
+        "title": "WordPress Core Updated",
+        "excerpt": "Track when users upgraded the WordPress core.",
+        "category": "Core Management",
+        "status": "active"
+    },
+    {
+        "guid": "648112da-6b94-49ed-96cd-d2246fa147fd",
+        "title": "Plugin Activated",
+        "excerpt": "Track any plugin activation by a user from the WordPress backend \"Plugins\" page, via RESTful API or WordPress CLI.",
+        "category": "Plugin Management",
+        "status": "active"
+    },
+    {
+        "guid": "322ea61c-9466-49b6-b0bf-714790caefe2",
+        "title": "Plugin Updated",
+        "excerpt": "Track any plugin updates (upgrades) by a user from the WordPress backend \"Plugins\" page, via RESTful API or WordPress CLI.",
+        "category": "Plugin Management",
+        "status": "active"
+    },
+    {
+        "guid": "c7d7c224-0c48-4b64-a67c-d18eac19c01d",
+        "title": "Plugin Deactivated",
+        "excerpt": "Track any plugin deactivation by a user from the WordPress backend \"Plugins\" page, via RESTful API or WordPress CLI.",
+        "category": "Plugin Management",
+        "status": "active"
+    },
+    {
+        "guid": "87df3855-d38b-44f2-a483-2bccdee8f060",
+        "title": "Plugin Installed",
+        "excerpt": "Track any plugin installation by a user from the WordPress backend \"Plugins\" page, via RESTful API or WordPress CLI.",
+        "category": "Plugin Management",
+        "status": "active"
+    },
+    {
+        "guid": "4882d8b6-b32d-4e2b-8d0f-1074ab214051",
+        "title": "Plugin Deleted",
+        "excerpt": "Track any plugin deletion by a user from the WordPress backend \"Plugins\" page, via RESTful API or WordPress CLI.",
+        "category": "Plugin Management",
+        "status": "active"
+    },
+    {
+        "guid": "568732b9-cca0-467c-97e8-89a5432a4bf1",
+        "title": "Plugin's File Updated",
+        "excerpt": "Track changes to any plugin's file by a user from the WordPress backend \"Plugin Editor\" page.",
+        "category": "Plugin Management",
+        "status": "active"
+    },
+    {
+        "guid": "f592fc90-8e6b-4062-8b00-ebc20dd435a9",
+        "title": "Toggled Auto-Update For A Plugin",
+        "excerpt": "Track when a user toggled either enable or disable auto-update for a plugin on the \"Plugins\" page.",
+        "category": "Plugin Management",
+        "status": "active"
+    },
+    {
+        "guid": "e08dafdc-5ef8-47a6-b25c-207547445601",
+        "title": "Enabled Multiple Plugins Auto-Update",
+        "excerpt": "Track when a user enabled auto-update for one or multiple plugins on the \"Plugins\" page.",
+        "category": "Plugin Management",
+        "status": "active"
+    },
+    {
+        "guid": "374eca2c-6661-414d-81c4-d45fa58eb18b",
+        "title": "Disabled Multiple Plugins Auto-Update",
+        "excerpt": "Track when a user disabled auto-update for one or multiple plugins on the \"Plugins\" page.",
+        "category": "Plugin Management",
+        "status": "active"
+    },
+    {
+        "guid": "bf9209cf-3434-4bff-9d4e-014378ab481a",
+        "title": "Theme's File Updated",
+        "excerpt": "Track changes to any theme's file by a user from the WordPress backend \"Theme Editor\" page.",
+        "category": "Theme Management",
+        "status": "active"
+    },
+    {
+        "guid": "e8f39a63-bffb-4122-b4e9-109689abfb30",
+        "title": "Theme Installed",
+        "excerpt": "Track any theme installation by a user from the WordPress backend \"Appearance\" page, via RESTful API or WordPress CLI.",
+        "category": "Theme Management",
+        "status": "active"
+    },
+    {
+        "guid": "b06d8a45-1319-440e-a3f8-4bdb958def29",
+        "title": "Theme Updated",
+        "excerpt": "Track any theme update by a user from the WordPress backend \"Appearance\" page, via RESTful API or WordPress CLI.",
+        "category": "Theme Management",
+        "status": "active"
+    },
+    {
+        "guid": "60d5f03e-f9e6-494a-abca-4b3078ac5352",
+        "title": "Toggled Auto-Update For A Theme",
+        "excerpt": "Track when a user toggled either enable or disable auto-update for a theme on the \"Appearance\" page.",
+        "category": "Theme Management",
+        "status": "active"
+    },
+    {
+        "guid": "92d36595-58f2-4473-babe-df79d27a008d",
+        "title": "Theme Switched",
+        "excerpt": "Track theme switch by a user from the WordPress backend \"Appearance\" page, via RESTful API or WordPress CLI.",
+        "category": "Theme Management",
+        "status": "active"
+    },
+    {
+        "guid": "52425269-53c5-4101-b999-ab5f466fc986",
+        "title": "New User Registered",
+        "excerpt": "Track new user registration or whenever new user profile is successfully added to the website",
+        "category": "User Management",
+        "status": "active"
+    },
+    {
+        "guid": "3c1b4410-011d-4e33-82a2-27a7f47a68b0",
+        "title": "User Profile Updated",
+        "excerpt": "Track when any user's profile is updated",
+        "category": "User Management",
+        "status": "active"
+    },
+    {
+        "guid": "8d09c9e9-b232-412d-99ed-5bce9dc829dd",
+        "title": "User Deleted",
+        "excerpt": "Track when any user is deleted",
+        "category": "User Management",
+        "status": "active"
+    },
+    {
+        "guid": "f5385dbc-7005-4528-ac59-053a2d7be275",
+        "title": "Post Status Changed",
+        "excerpt": "Track when a user changes any post status (e.g. from draft to publish, or from publish to trash, etc.)",
+        "category": "Content Management",
+        "status": "active"
+    },
+    {
+        "guid": "d88eb993-9139-4d41-85cf-6061648332fe",
+        "title": "Post Updated",
+        "excerpt": "Track when a user updates any post. By default, this event is aggregated by 30 minutes time interval.",
+        "category": "Content Management",
+        "status": "active"
+    },
+    {
+        "guid": "4634d6fa-919a-4f12-80ea-60f43ae37c46",
+        "title": "Media File Uploaded",
+        "excerpt": "Track when a user uploads/adds new media file to the media library.",
+        "category": "Content Management",
+        "status": "active"
+    }
+]
