@@ -3,7 +3,7 @@
 /**
  * Plugin Name: Noti - Activity Notification
  * Description: Totally free, infinitely configurable, and powerful website activity monitoring and alerting plugin for WordPress projects of any scale.
- * Version: 0.0.1
+ * Version: 0.0.2
  * Author: Vasyl Martyniuk <vasyl@vasyltech.com>
  * Author URI: https://vasyltech.com
  * Text Domain: noti
