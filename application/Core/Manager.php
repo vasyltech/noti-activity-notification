@@ -94,7 +94,7 @@ class Manager
             $args = func_get_args();
 
             // Parse the event policy and determine if we need to persist this event
-            $manager = EventPolicyFactory::getInstance()->hydrate(
+            $manager = EventPolicyFactory::getInstance()->getPolicyManager(
                 json_encode($eventType->policy),
                 array(
                     'args'      => $args,
@@ -180,10 +180,10 @@ class Manager
 
                 // Parse the event policy and determine if we need to trigger the
                 // listener
-                $manager = EventPolicyFactory::getInstance()->hydrate(
+                $manager = EventPolicyFactory::getInstance()->getPolicyManager(
                     json_encode($listener->policy),
                     array(
-                        'args' => $args,
+                        'args'      => $args,
                         'eventType' => $eventType->post
                     )
                 );

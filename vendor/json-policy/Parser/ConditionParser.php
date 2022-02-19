@@ -29,7 +29,7 @@ class ConditionParser
      * @access public
      * @version 0.0.1
      */
-    public static function parse(object $conditions, Context $context)
+    public static function parse($conditions, Context $context)
     {
         foreach($conditions as $type => $group) {
             if ($type !== 'Operator') {
@@ -51,7 +51,7 @@ class ConditionParser
      * @access protected
      * @version 0.0.1
      */
-    protected static function tokenizeGroup(object $group, Context $context)
+    protected static function tokenizeGroup($group, Context $context)
     {
         foreach($group as $left => $right) {
             if ($left !== 'Operator') {

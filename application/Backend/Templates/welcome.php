@@ -18,7 +18,7 @@ if (defined('NOTI_KEY')) {
         <table style="width:100%; margin-top: 30px;">
             <tbody>
                 <tr>
-                    <td width="50%" style="vertical-align: top; padding: 0 20px 0 0; font-size: 1em;">
+                    <td width="50%" style="vertical-align: top; padding: 0 20px 0 0;">
                         <p style="margin-top: 0;">
                             Howdy, <strong><?php echo esc_js(wp_get_current_user()->display_name); ?></strong> and welcome to none-commercial, free of any charges website activity monitoring and notification plugin.
                         </p>
@@ -36,7 +36,12 @@ if (defined('NOTI_KEY')) {
                             <input type="button" id="setup" class="button button-primary" value="Let's Get Started">
                         </div>
                     </td>
-                    <td width="50%">&nbsp;</td>
+                    <td width="50%" style="vertical-align: middle; text-align: center; font-size: 1.2em;">
+                        <p style="margin: 0; font-size:1.2em;">Please also subscribe to regular newsletters so you can learn about upcoming new features and announcements</p>
+                        <div style="margin-top: 10px;">
+                            <a href="https://mailchi.mp/3a13b922c0bd/getnoti" target="_blank" class="button button-primary">Subscribe To Newsletters</a>
+                        </div>
+                    </td>
                 </tr>
             </tbody>
         </table>

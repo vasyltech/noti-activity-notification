@@ -501,7 +501,7 @@ class ConditionManager
      * @access private
      * @version 0.0.1
      */
-    private function _determineConditionOperator(object $conditions)
+    private function _determineConditionOperator($conditions)
     {
         $op = 'AND';
 

@@ -1,10 +1,10 @@
-=== Noti - Activity Notifications ===
+=== Noti - Activity Notification ===
 Contributors: vasyltech
 Tags: user activity, audit log, notifications, tracking
 Requires at least: 4.7.0
 Requires PHP: 7.0.0
 Tested up to: 5.9.0
-Stable tag: 0.0.1
+Stable tag: 0.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -28,6 +28,15 @@ A FEW QUICK FACTS
 * Noti is optimized for large-scale websites and comes with the ability to aggregate similar events over a defined period of time. This potentially can reduce DB storage usage by 50% or more.
 
 
+NEED A NEW FEATURE? JUST ASK!
+
+Noti is a brand new plugin, so naturally many useful, user-friendly and polished features may be missing. My initial intention was on preparing a solid and healthy foundation. From here it can grow and grow fast.
+
+Pick any new feature or enhancement that you like/need and I will gladly add it in future releases. It literally can be any free or paid feature that is available in other "user monitoring and alerting" plugins and if it requires only my time, I will prioritize it. That is why please [subscribe to the regular email notifications](https://mailchi.mp/3a13b922c0bd/getnoti) where I will be disclosing new feature releases and announcements.
+
+My only ask for you is to help spread awareness about Noti. More active installations - faster new features will be added.
+
+
 HOW DOES IT WORK?
 
 Noti is based on the WordPress core concept of hooks (actions and filters). When a hook is triggered, it typically carries enough information about the event. That is why 9 out of 10 times it is just a matter of “listening” for certain hooks and storing carried information in DB. Of course, sometimes, you have to take into account certain conditions, enrich information by calling some other function, or even combine data from multiple hooks. The good thing is that Noti allows you to do all this without writing a single line of code.
@@ -48,9 +57,11 @@ I'm a financially independent principal engineer leading a handful of strategic 
 
 HOW DOES SUPPORT WORK?
 
-From the extensive experience of managing other digital products (including a few WordPress plugins), I recognize that support does not scale well with just one person in charge. However, I will do my best to answer any questions you may have on the official WordPress forum or on Github.
+From the extensive experience of managing other digital products (including a few WordPress plugins), I recognize that support does not scale well with just one person in charge. However, I will do my best to answer any questions you may have on the official WordPress forum or on [Github](https://github.com/vasyltech/noti-activity-notification).
 
 Also, you are welcome to contribute to the product with your code, transactions, new event types or help me answer any questions that other folks may have. I’m hoping that over time we will build a strong community around this product and evolve it beyond imagination.
+
+Please also [subscribe to the regular email notifications](https://mailchi.mp/3a13b922c0bd/getnoti) where I will be disclosing new feature releases and announcements.
 
 
 == Installation ==
@@ -67,6 +78,9 @@ Also, you are welcome to contribute to the product with your code, transactions,
 5. Configure basic settings, notification types, and email template
 
 == Changelog ==
+
+= 0.0.2 =
+* Fixed Bug: fread(): read of 8192 bytes failed ... [https://github.com/vasyltech/noti-activity-notification/issues/1](https://github.com/vasyltech/noti-activity-notification/issues/1)
 
 = 0.0.1 =
 * Initial and minimalist version

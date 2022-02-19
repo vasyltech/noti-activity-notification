@@ -22,7 +22,7 @@ class PolicyParser
     /**
      * Parse policies
      *
-     * @param string                   $policy
+     * @param object                   $policy
      * @param \JsonPolicy\Core\Context $context
      *
      * @return object
@@ -30,20 +30,13 @@ class PolicyParser
      * @access public
      * @version 0.0.1
      */
-    public static function parse(string $policy, Context $context)
+    public static function parse($policy, Context $context)
     {
         $response = null;
-        $decoded  = json_decode($policy);
 
-        if (is_object($decoded) || is_array($decoded)) { // Is valid JSON structure?
-            if (is_scalar($decoded)) {
-                $response = ExpressionParser::parseToValue($decoded, $context);
-            } else if (is_null($decoded)) {
-                $response = $decoded;
-            } else {
-                $response = self::iterate($decoded, $context);
-            }
-        } else {
+        if (is_object($policy) || is_array($policy)) { // Is valid JSON structure?
+            $response = self::iterate($policy, $context);
+        } elseif (is_scalar($policy) || is_null($policy)) {
             $response = ExpressionParser::parseToValue($policy, $context);
         }
 
@@ -53,7 +46,19 @@ class PolicyParser
     /**
      * Undocumented function
      *
-     * @param object  $config
+     * @param object $conditions
+     * @param Context $context
+     * @return void
+     */
+    public static function parseCondition($conditions, Context $context)
+    {
+        return ConditionParser::parse($conditions, $context);
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param object  $policy
      * @param Context $context
      *
      * @return mixed
@@ -61,12 +66,10 @@ class PolicyParser
      * @access protected
      * @static
      */
-    protected static function iterate($config, Context $context)
+    protected static function iterate($policy, Context $context)
     {
-        foreach($config as $key => $value) {
-            if ($key === 'Condition') {
-                $config->{$key} = ConditionParser::parse($value, $context);
-            } else {
+        foreach($policy as $key => $value) {
+            if ($key !== 'Condition') {
                 $parsed_key = ExpressionParser::parseToValue($key, $context);
 
                 if (is_scalar($value)) {
@@ -79,15 +82,15 @@ class PolicyParser
                     $parsed_value = self::iterate($value, $context);
                 }
 
-                if (is_array($config)) {
-                    $config[$parsed_key] = $parsed_value;
+                if (is_array($policy)) {
+                    $policy[$parsed_key] = $parsed_value;
                 } else {
-                    $config->{$parsed_key} = $parsed_value;
+                    $policy->{$parsed_key} = $parsed_value;
                 }
             }
         }
 
-        return $config;
+        return $policy;
     }
 
 }

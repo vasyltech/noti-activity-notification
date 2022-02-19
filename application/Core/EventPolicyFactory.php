@@ -24,6 +24,27 @@ class EventPolicyFactory
     );
 
     /**
+     *
+     */
+    const CUSTOM_MARKERS = array (
+        'FUNC'              => __CLASS__ . '::getCallbackReturn',
+        'ARRAY_MAP'         => __CLASS__ . '::getArrayMapReturn',
+        'CONST'             => __CLASS__ . '::getConstant',
+        'USER'              => __CLASS__ . '::getUserValue',
+        'USER_OPTION'       => __CLASS__ . '::getUserOptionValue',
+        'USER_META'         => __CLASS__ . '::getUserMetaValue',
+        'WP_OPTION'         => __CLASS__ . '::getWPOption',
+        'WP_SITE'           => __CLASS__ . '::getSiteParam',
+        'PHP_GLOBAL'        => __CLASS__ . '::getGlobalVariable',
+        'WP_NETWORK_OPTION' => __CLASS__ . '::getNetworkOption',
+        'LISTENER'          => __CLASS__ . '::getListenerData',
+        'EVENT_META'        => __CLASS__ . '::getEventMetadata',
+        'EVENT'             => __CLASS__ . '::getEventData',
+        'EVENT_TYPE'        => __CLASS__ . '::getEventTypeData',
+        'EVENT_TYPE_META'   => __CLASS__ . '::getEventTypeMetaValue'
+    );
+
+    /**
      * Undocumented variable
      *
      * @var array
@@ -164,6 +185,11 @@ class EventPolicyFactory
                     // Also parse all the listeners if defined
                     if (isset($json->Listeners) && is_array($json->Listeners)) {
                         $listeners = $json->Listeners;
+
+                        // Important - unsettings listeners so they are not hydrated
+                        // unnecessarily during parent policy hydration. Listeners
+                        // are hydrated separately
+                        unset($json->Listeners);
                     } else {
                         $listeners = array();
                     }
@@ -246,41 +272,6 @@ class EventPolicyFactory
     /**
      * Undocumented function
      *
-     * @param string $policy
-     * @param array  $context
-     *
-     * @return JsonPolicyManager
-     */
-    public function hydrate(string $policy = null, array $context = [])
-    {
-        $settings = array(
-            'policy'         => $policy,
-            'context'        => $context,
-            'custom_markers' => array(
-                'FUNC'              => __CLASS__ . '::getCallbackReturn',
-                'ARRAY_MAP'         => __CLASS__ . '::getArrayMapReturn',
-                'CONST'             => __CLASS__ . '::getConstant',
-                'USER'              => __CLASS__ . '::getUserValue',
-                'USER_OPTION'       => __CLASS__ . '::getUserOptionValue',
-                'USER_META'         => __CLASS__ . '::getUserMetaValue',
-                'WP_OPTION'         => __CLASS__ . '::getWPOption',
-                'WP_SITE'           => __CLASS__ . '::getSiteParam',
-                'PHP_GLOBAL'        => __CLASS__ . '::getGlobalVariable',
-                'WP_NETWORK_OPTION' => __CLASS__ . '::getNetworkOption',
-                'LISTENER'          => __CLASS__ . '::getListenerData',
-                'EVENT_META'        => __CLASS__ . '::getEventMetadata',
-                'EVENT'             => __CLASS__ . '::getEventData',
-                'EVENT_TYPE'        => __CLASS__ . '::getEventTypeData',
-                'EVENT_TYPE_META'   => __CLASS__ . '::getEventTypeMetaValue'
-            )
-        );
-
-        return JsonPolicyManager::bootstrap($settings, !is_null($policy));
-    }
-
-    /**
-     * Undocumented function
-     *
      * @param string $str
      * @param array $context
      *
@@ -292,7 +283,24 @@ class EventPolicyFactory
             'str' => $str
         ];
 
-        return $this->hydrate(json_encode($container), $context)->str;
+        return $this->getPolicyManager(json_encode($container), $context)->str;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param string $policy
+     * @param array $context
+     *
+     * @return JsonPolicyManager
+     */
+    public function getPolicyManager(string $policy, array $context = [])
+    {
+        return new JsonPolicyManager(array(
+            'policy'         => $policy,
+            'context'        => $context,
+            'custom_markers' => self::CUSTOM_MARKERS
+        ));
     }
 
     /**

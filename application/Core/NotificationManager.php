@@ -200,12 +200,12 @@ class NotificationManager
                 }
 
                 // Hydrate the config
-                $hydrated = EventPolicyFactory::getInstance()->hydrate(
+                $manager = EventPolicyFactory::getInstance()->getPolicyManager(
                     json_encode($merged)
                 );
 
-                if (!empty($hydrated->Status) && $hydrated->Status === 'active') {
-                    array_push($response, $hydrated->getPolicyTree());
+                if (isset($manager->Status) && $manager->Status === 'active') {
+                    array_push($response, $manager);
                 }
             }
         }
@@ -237,14 +237,14 @@ class NotificationManager
             if ($notification->Type === 'webhook') {
                 array_push(
                     $packages[$notification->Type]->Messages,
-                    $factory->hydrate(
+                    $factory->getPolicyManager(
                         $notification->Payload ? json_encode($notification->Payload) : '{}',
                         array(
                             'eventType' => get_post($event['post_id']),
                             'event'     => $event,
                             'metadata'  => Repository::getEventMeta($event['id'])
                         )
-                    )->getPolicyTree()
+                    )
                 );
             } else {
                 array_push(

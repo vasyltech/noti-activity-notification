@@ -102,7 +102,7 @@ class TypecastManager
                 break;
 
             case 'null':
-                if (is_scalar($value)) {
+                if (is_scalar($value) || is_null($value)) {
                     $value = (is_null($value) || $value === ''  ? null : $value);
                 } else if (is_array($value)) {
                     $value = (count($value) === 0 ? null : $value);

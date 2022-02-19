@@ -65,14 +65,25 @@ class Manager
     private $_condition_manager = null;
 
     /**
-     * Parsed policy tree
+     * Undocumented variable
      *
-     * @var object
-     *
-     * @access private
-     * @version 0.0.1
+     * @var boolean
      */
-    private $_tree = null;
+    private $_isHydrated = false;
+
+    /**
+     * Undocumented variable
+     *
+     * @var [type]
+     */
+    private $_policy = null;
+
+    /**
+     * Undocumented variable
+     *
+     * @var [type]
+     */
+    private $_condition = null;
 
     /**
      * Context
@@ -93,12 +104,32 @@ class Manager
      *
      * @return void
      *
-     * @access protected
+     * @access public
      * @version 0.0.1
      */
-    protected function __construct(array $settings)
+    public function __construct(array $settings)
     {
         $this->_settings = $settings;
+
+        if (!empty($settings['context'])) {
+            $this->_context = new Context(array_merge(
+                $settings['context'],
+                [ 'manager' => $this ]
+            ));
+        } else {
+            $this->_context = new Context(['manager' => $this]);
+        }
+
+        if (!empty($settings['policy'])) {
+            $this->_policy = json_decode($settings['policy']);
+
+            if (isset($this->_policy->Condition)) {
+                $this->_condition = PolicyParser::parseCondition(
+                    $this->_policy->Condition,
+                    $this->_context
+                );
+            }
+        }
     }
 
     /**
@@ -109,7 +140,11 @@ class Manager
      */
     public function __get($prop)
     {
-        return property_exists($this->_tree, $prop) ? $this->_tree->{$prop} : null;
+        if (!$this->_isHydrated) {
+            $this->hydrate();
+        }
+
+        return property_exists($this->_policy, $prop) ? $this->_policy->{$prop} : null;
     }
 
     /**
@@ -121,7 +156,11 @@ class Manager
      */
     public function __isset($prop)
     {
-        return property_exists($this->_tree, $prop);
+        if (!$this->_isHydrated) {
+            $this->hydrate();
+        }
+
+        return property_exists($this->_policy, $prop);
     }
 
     /**
@@ -143,16 +182,6 @@ class Manager
         }
 
         return $setting;
-    }
-
-    /**
-     * Undocumented function
-     *
-     * @return void
-     */
-    public function getPolicyTree()
-    {
-        return $this->_tree;
     }
 
     /**
@@ -243,33 +272,27 @@ class Manager
     /**
      * Check if policy statement or param is applicable
      *
-     * @param Context|null $context
-     * @param object|null  $object
-     *
      * @return boolean
      *
      * @access public
      * @version 0.0.1
      */
-    public function isApplicable(Context $context = null, object $object = null)
+    public function isApplicable()
     {
-        $target  = is_null($object) ? $this->_tree : $object;
-        $context = is_null($context) ? $this->_context : $context;
-
         $result = true;
 
-        if (!empty($target->Condition) && is_object($target->Condition)) {
-            $conditions = $target->Condition;
+        if (!is_null($this->_condition)) {
+            $conditions = $this->_condition;
 
             foreach ($conditions as $i => &$group) {
                 if ($i !== 'Operator') {
                     foreach ($group as $j => &$row) {
                         if ($j !== 'Operator') {
                             $left  = ExpressionParser::convertToValue(
-                                $row['left'], $context
+                                $row['left'], $this->_context
                             );
                             $right = ExpressionParser::convertToValue(
-                                $row['right'], $context
+                                $row['right'], $this->_context
                             );
 
                             $row = array(
@@ -293,44 +316,16 @@ class Manager
      * Hydrate the JSON policy
      *
      * Basically replace all the markers with values and parse Conditions to be
-     * evaluated in futher steps
+     * evaluated in further steps
      *
-     * @param string        $policy
-     * @param Context|array $context
-     *
-     * @return object|string|null
+     * @return Manager
      */
-    public function hydrate(string $policy, $context = null)
+    public function hydrate()
     {
-        if (!is_a($context, 'JsonPolicy\Core\Context')){
-            $context = new Context(array_merge(
-                [ 'manager' => $this ],
-                is_array($context) ? $context : []
-            ));
-        }
+        $this->_policy     = PolicyParser::parse($this->_policy, $this->_context);
+        $this->_isHydrated = true;
 
-        return PolicyParser::parse($policy, $context);
-    }
-
-    /**
-     * Initialize the policy manager
-     *
-     * @return void
-     *
-     * @access protected
-     * @version 0.0.1
-     */
-    protected function initialize()
-    {
-        $this->_context = new Context(array_merge(
-            [ 'manager' => $this ],
-            $this->getSetting('context')
-        ));
-
-        // Parse the collection of policies
-        $this->_tree = $this->hydrate(
-            $this->getSetting('policy', false), $this->_context
-        );
+        return $this;
     }
 
     /**
@@ -367,29 +362,6 @@ class Manager
         }
 
         return $iterator;
-    }
-
-    /**
-     * Bootstrap the framework
-     *
-     * @param array $settings Manager settings
-     *
-     * @return JsonPolicy\Manager
-     *
-     * @access public
-     * @static
-     * @version 0.0.1
-     */
-    public static function bootstrap(array $settings = [], bool $init = true): Manager
-    {
-        $instance = new self($settings);
-
-        // Initialize the manager if there is policy provided
-        if ($init) {
-            $instance->initialize();
-        }
-
-        return $instance;
     }
 
 }
