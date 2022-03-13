@@ -78,6 +78,11 @@ class OptionManager
         return $result;
     }
 
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
     public static function reset()
     {
         self::deleteOption('noti-welcome');
@@ -85,6 +90,8 @@ class OptionManager
         self::deleteOption('noti-keep-logs');
         self::deleteOption('noti-cleanup-type');
         self::deleteOption('noti-email-notification-tmpl');
+        self::deleteOption('noti-auto-update');
+        self::deleteOption('noti-version');
     }
 
 }

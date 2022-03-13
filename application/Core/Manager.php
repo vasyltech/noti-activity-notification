@@ -13,6 +13,11 @@ class Manager
 {
 
     /**
+     *
+     */
+    const PLUGIN_SLUG = 'noti-activity-notification/noti-activity-notification.php';
+
+    /**
      * Undocumented variable
      *
      * @var [type]
@@ -29,6 +34,11 @@ class Manager
 
         // Bootstrap the Event policy factory
         $factory = EventPolicyFactory::bootstrap();
+
+        // Confirming that upgrade is not needed
+        if (OptionManager::getOption('noti-version') !== NOTI_VERSION) {
+            $this->upgrade();
+        }
 
         // Building the tree of active events and hooking them to the system
         foreach ($factory->getActiveEventTypes() as $type) {
@@ -75,6 +85,7 @@ class Manager
         add_action('noti_send_notifications', function () {
             NotificationManager::trigger();
         });
+
     }
 
     /**
@@ -247,6 +258,33 @@ class Manager
         }
 
         return $response;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
+    protected function upgrade()
+    {
+        // Updating all official event types
+        $auto_update = OptionManager::getOption('noti-auto-update', true);
+
+        if ($auto_update) {
+            $registry = json_decode(
+                file_get_contents(NOTI_BASEDIR . '/setup/registry.json')
+            );
+
+            foreach ($registry as $item) {
+                $item->policy = json_decode(file_get_contents(
+                    NOTI_BASEDIR . '/setup/event-types/' . $item->guid . '.json'
+                ));
+
+                EventTypeManager::getInstance()->insertType($item);
+            }
+        }
+
+        OptionManager::updateOption('noti-version', NOTI_VERSION);
     }
 
     /**

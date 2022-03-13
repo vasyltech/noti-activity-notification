@@ -4,7 +4,7 @@ Tags: user activity, audit log, notifications, tracking
 Requires at least: 4.7.0
 Requires PHP: 7.0.0
 Tested up to: 5.9.0
-Stable tag: 0.0.2
+Stable tag: 0.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -78,6 +78,12 @@ Please also [subscribe to the regular email notifications](https://mailchi.mp/3a
 5. Configure basic settings, notification types, and email template
 
 == Changelog ==
+
+= 0.1.0 =
+* Added: Upgrade plugin mechanism [https://github.com/vasyltech/noti-activity-notification/issues/2](https://github.com/vasyltech/noti-activity-notification/issues/2)
+* Added: Term Created event type
+* Added: Term Updated event type
+* Added: Term Deleted event type
 
 = 0.0.2 =
 * Fixed Bug: fread(): read of 8192 bytes failed ... [https://github.com/vasyltech/noti-activity-notification/issues/1](https://github.com/vasyltech/noti-activity-notification/issues/1)

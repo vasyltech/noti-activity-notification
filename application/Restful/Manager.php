@@ -324,6 +324,10 @@ class Manager
             }
 
             $this->installPostTypes($types);
+
+            OptionManager::updateOption('noti-auto-update', 1, true);
+        } else {
+            OptionManager::updateOption('noti-auto-update', 0, true);
         }
 
         return true;
@@ -339,49 +343,7 @@ class Manager
     protected function installPostTypes($types)
     {
         foreach ($types as $type) {
-            $existing = Repository::getPostTypeByGuid($type->guid);
-
-            if (empty($existing->ID)) {
-                $post_id = wp_insert_post(array(
-                    'post_type'      => EventTypeManager::EVENT_TYPE,
-                    'post_title'     => $type->title,
-                    'post_excerpt'   => $type->excerpt,
-                    'post_status'    => $type->status === 'active' ? 'publish' : 'draft',
-                    'post_content'   => json_encode($type->policy),
-                    'comment_status' => 'closed',
-                    'ping_status'    => 'closed'
-                ));
-
-                if (!is_wp_error($post_id)) {
-                    if (isset($type->category)) {
-                        // Adding newly added post to event type category
-                        $term_id = term_exists(
-                            $type->category,
-                            EventTypeManager::EVENT_TYPE_CATEGORY
-                        );
-
-                        if (!$term_id) {
-                            $term = wp_insert_term(
-                                $type->category,
-                                EventTypeManager::EVENT_TYPE_CATEGORY
-                            );
-                            $term_id = !is_wp_error($term) ? $term['term_id'] : null;
-                        }
-
-                        if ($term_id) {
-                            wp_set_post_terms(
-                                $post_id,
-                                $term_id,
-                                EventTypeManager::EVENT_TYPE_CATEGORY,
-                                true
-                            );
-                        }
-                    }
-
-                    // Also insert GUID
-                    add_post_meta($post_id, 'guid', $type->guid, true);
-                }
-            }
+            EventTypeManager::getInstance()->insertType($type);
         }
 
         return true;
